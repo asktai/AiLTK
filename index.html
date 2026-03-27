@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>律师费诉讼费计算器 | Legal Fee Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .serif { font-family: 'Noto Serif SC', serif; }
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .result-card {
+            transition: all 0.3s ease;
+        }
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen text-slate-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50 no-print">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                    法
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900">律师费诉讼费计算器</h1>
+                    <p class="text-xs text-slate-500">Legal Fee & Litigation Cost Calculator</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="resetAll()" class="px-4 py-2 text-sm text-slate-600 hover:text-indigo-600 transition-colors">
+                    重置
+                </button>
+                <button onclick="window.print()" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm hover:bg-slate-800 transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    打印/保存PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8 grid lg:grid-cols-3 gap-6">
+        
+        <!-- Input Section -->
+        <div class="lg:col-span-1 space-y-6 no-print">
+            <!-- Basic Info -->
+            <div class="glass rounded-2xl p-6 shadow-lg">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-sm">1</span>
+                    案件基本信息
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">案件类型</label>
+                        <select id="caseType" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" onchange="toggleFields()">
+                            <option value="property">财产案件（合同纠纷、债权债务等）</option>
+                            <option value="divorce">离婚案件（涉及财产分割）</option>
+                            <option value="labor">劳动争议案件</option>
+                            <option value="ip">知识产权案件</option>
+                            <option value="nonProperty">非财产案件（确认之诉等）</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">争议标的额 / 合同金额</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-2.5 text-slate-500">¥</span>
+                            <input type="number" id="amount" class="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" placeholder="输入金额（元）" oninput="calculateAll()">
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">将用于计算受理费和律师费</p>
+                    </div>
+
+                    <div id="regionSelect">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">律师执业地区</label>
+                        <select id="region" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" onchange="calculateAll()">
+                            <option value="beijing">北京 / 上海 / 广州 / 深圳</option>
+                            <option value="province">其他省会城市 / 计划单列市</option>
+                            <option value="other">其他地区</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lawyer Fee Settings -->
+            <div class="glass rounded-2xl p-6 shadow-lg">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm">2</span>
+                    律师费设置
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">计费方式</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="setFeeMode('ratio')" id="modeRatio" class="px-3 py-2 border-2 border-indigo-600 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium transition-all">比例收费</button>
+                            <button onclick="setFeeMode('fixed')" id="modeFixed" class="px-3 py-2 border-2 border-slate-200 text-slate-600 rounded-lg text-sm font-medium transition-all hover:border-slate-300">固定收费</button>
+                        </div>
+                    </div>
+
+                    <div id="ratioSettings">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">收费阶段</label>
+                        <select id="stage" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all mb-3" onchange="calculateAll()">
+                            <option value="one">一审阶段</option>
+                            <option value="two">一审+二审阶段</option>
+                            <option value="full">一审+二审+执行阶段</option>
+                            <option value="arbitration">仲裁案件</option>
+                        </select>
+
+                        <label class="block text-sm font-medium text-slate-700 mb-1">优惠折扣</label>
+                        <select id="discount" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" onchange="calculateAll()">
+                            <option value="1">标准收费（100%）</option>
+                            <option value="0.9">9折优惠</option>
+                            <option value="0.8">8折优惠</option>
+                            <option value="0.7">7折优惠</option>
+                            <option value="0.6">6折优惠</option>
+                            <option value="0.5">5折优惠</option>
+                        </select>
+                    </div>
+
+                    <div id="fixedSettings" class="hidden">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">固定费用（元）</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-2.5 text-slate-500">¥</span>
+                            <input type="number" id="fixedAmount" class="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" placeholder="输入固定费用" oninput="calculateAll()">
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-200">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="riskAgent" class="w-4 h-4 text-indigo-600 rounded" onchange="toggleRisk()">
+                            <span class="text-sm text-slate-700">风险代理（胜诉/回款后收费）</span>
+                        </label>
+                        <div id="riskSettings" class="hidden mt-3 space-y-2">
+                            <div class="relative">
+                                <input type="number" id="riskRate" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" placeholder="回款比例（%）" oninput="calculateAll()">
+                                <span class="absolute right-4 top-2.5 text-slate-500">%</span>
+                            </div>
+                            <p class="text-xs text-amber-600">注：风险代理最高收费金额不得高于收费合同约定标的额的30%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preset Buttons -->
+            <div class="glass rounded-2xl p-4 shadow-lg">
+                <h3 class="text-sm font-bold text-slate-700 mb-3">快速预设</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="setPreset(100000)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded text-sm transition-colors">10万元纠纷</button>
+                    <button onclick="setPreset(500000)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded text-sm transition-colors">50万元纠纷</button>
+                    <button onclick="setPreset(1000000)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded text-sm transition-colors">100万元纠纷</button>
+                    <button onclick="setPreset(5000000)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded text-sm transition-colors">500万元纠纷</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Summary Cards -->
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="result-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg">
+                    <p class="text-blue-100 text-sm mb-1">法院诉讼费（受理费）</p>
+                    <p class="text-3xl font-bold serif" id="courtFeeDisplay">¥0</p>
+                    <p class="text-blue-100 text-xs mt-2">立案时预交，败诉方承担</p>
+                </div>
+                
+                <div class="result-card bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
+                    <p class="text-indigo-100 text-sm mb-1">律师代理费</p>
+                    <p class="text-3xl font-bold serif" id="lawyerFeeDisplay">¥0</p>
+                    <p class="text-indigo-100 text-xs mt-2" id="lawyerFeeNote">一审阶段标准收费</p>
+                </div>
+
+                <div class="result-card bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl p-6 text-white shadow-lg">
+                    <p class="text-slate-300 text-sm mb-1">预计总成本</p>
+                    <p class="text-3xl font-bold serif" id="totalCostDisplay">¥0</p>
+                    <p class="text-slate-300 text-xs mt-2">不含差旅、鉴定等其他费用</p>
+                </div>
+            </div>
+
+            <!-- Charts & Details -->
+            <div class="glass rounded-2xl p-6 shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold">费用构成分析</h3>
+                    <div class="flex gap-2">
+                        <button onclick="toggleView('chart')" id="btnChart" class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-sm font-medium">图表</button>
+                        <button onclick="toggleView('table')" id="btnTable" class="px-3 py-1 rounded-full text-slate-600 text-sm font-medium hover:bg-slate-100">明细</button>
+                    </div>
+                </div>
+
+                <div id="chartView" class="h-64">
+                    <canvas id="feeChart"></canvas>
+                </div>
+
+                <div id="tableView" class="hidden space-y-4">
+                    <div class="overflow-hidden rounded-lg border border-slate-200">
+                        <table class="w-full text-sm">
+                            <thead class="bg-slate-50 text-slate-700">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">费用项目</th>
+                                    <th class="px-4 py-3 text-right">计算标准</th>
+                                    <th class="px-4 py-3 text-right">金额</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200" id="detailTable">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
+                        <p class="font-bold mb-1">⚠️ 重要提示</p>
+                        <ul class="list-disc list-inside space-y-1 text-xs">
+                            <li>诉讼费由原告预交，最终由败诉方承担；部分胜诉部分败诉的，法院根据案件具体情况决定当事人各自负担的数额。</li>
+                            <li>律师费原则上由聘请方自行承担，但合同纠纷中若合同约定由违约方承担，或知识产权、不正当竞争等特定案件，可主张由败诉方承担。</li>
+                            <li>实际收费可上下浮动，具体需与律师事务所协商确定。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculation Standards -->
+            <div class="glass rounded-2xl p-6 shadow-lg">
+                <h3 class="text-lg font-bold mb-4">计算标准说明</h3>
+                <div class="grid md:grid-cols-2 gap-6 text-sm">
+                    <div>
+                        <h4 class="font-bold text-indigo-700 mb-2">诉讼费计算标准（财产案件）</h4>
+                        <ul class="space-y-1 text-slate-600 text-xs">
+                            <li>• ≤1万元：50元</li>
+                            <li>• 1万-10万元：标的额×2.5% − 200元</li>
+                            <li>• 10万-20万元：标的额×2% + 300元</li>
+                            <li>• 20万-50万元：标的额×1.5% + 1300元</li>
+                            <li>• 50万-100万元：标的额×1% + 3800元</li>
+                            <li>• 100万-200万元：标的额×0.9% + 4800元</li>
+                            <li>• 200万-500万元：标的额×0.8% + 6800元</li>
+                            <li>• 500万-1000万元：标的额×0.7% + 11800元</li>
+                            <li>• 1000万-2000万元：标的额×0.6% + 21800元</li>
+                            <li>• >2000万元：标的额×0.5% + 41800元</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-purple-700 mb-2">律师费参考标准（比例收费）</h4>
+                        <ul class="space-y-1 text-slate-600 text-xs">
+                            <li>• ≤10万元：8%-10%（最低5000元）</li>
+                            <li>• 10万-100万元：6%-8%</li>
+                            <li>• 100万-1000万元：4%-6%</li>
+                            <li>• >1000万元：2%-4%</li>
+                        </ul>
+                        <p class="mt-3 text-xs text-slate-500">注：以上为常见参考标准，各省收费标准存在差异。刑事案件、行政案件按件计费。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Print Area (only visible when printing) -->
+            <div class="print-only hidden bg-white p-8">
+                <h1 class="text-2xl font-bold text-center mb-6">费用计算报告</h1>
+                <div class="space-y-4 text-sm">
+                    <div class="grid grid-cols-2 gap-4 border-b pb-4">
+                        <div>
+                            <p class="text-slate-500">案件类型</p>
+                            <p class="font-bold" id="printCaseType">财产案件</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500">标的金额</p>
+                            <p class="font-bold text-lg" id="printAmount">¥0</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span>法院诉讼费</span>
+                            <span class="font-bold" id="printCourtFee">¥0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>律师代理费</span>
+                            <span class="font-bold" id="printLawyerFee">¥0</span>
+                        </div>
+                        <div class="flex justify-between border-t pt-2 mt-2 text-lg font-bold">
+                            <span>预计总成本</span>
+                            <span id="printTotal">¥0</span>
+                        </div>
+                    </div>
+                    <div class="mt-8 text-xs text-slate-400 text-center">
+                        <p>Generated by 律师费诉讼费计算器</p>
+                        <p>本计算结果仅供参考，实际费用以法院和律师事务所收费为准</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        let feeChart = null;
+        let currentMode = 'ratio';
+
+        function formatMoney(amount) {
+            return '¥' + amount.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+        }
+
+        function setPreset(amount) {
+            document.getElementById('amount').value = amount;
+            calculateAll();
+        }
+
+        function setFeeMode(mode) {
+            currentMode = mode;
+            if (mode === 'ratio') {
+                document.getElementById('modeRatio').classList.add('border-indigo-600', 'bg-indigo-50', 'text-indigo-700');
+                document.getElementById('modeRatio').classList.remove('border-slate-200', 'text-slate-600');
+                document.getElementById('modeFixed').classList.remove('border-indigo-600', 'bg-indigo-50', 'text-indigo-700');
+                document.getElementById('modeFixed').classList.add('border-slate-200', 'text-slate-600');
+                document.getElementById('ratioSettings').classList.remove('hidden');
+                document.getElementById('fixedSettings').classList.add('hidden');
+            } else {
+                document.getElementById('modeFixed').classList.add('border-indigo-600', 'bg-indigo-50', 'text-indigo-700');
+                document.getElementById('modeFixed').classList.remove('border-slate-200', 'text-slate-600');
+                document.getElementById('modeRatio').classList.remove('border-indigo-600', 'bg-indigo-50', 'text-indigo-700');
+                document.getElementById('modeRatio').classList.add('border-slate-200', 'text-slate-600');
+                document.getElementById('ratioSettings').classList.add('hidden');
+                document.getElementById('fixedSettings').classList.remove('hidden');
+            }
+            calculateAll();
+        }
+
+        function toggleRisk() {
+            const isRisk = document.getElementById('riskAgent').checked;
+            const riskSettings = document.getElementById('riskSettings');
+            if (isRisk) {
+                riskSettings.classList.remove('hidden');
+            } else {
+                riskSettings.classList.add('hidden');
+            }
+            calculateAll();
+        }
+
+        function calculateCourtFee(amount) {
+            if (amount <= 0) return 0;
+            
+            // 根据《诉讼费用交纳办法》第十三条
+            if (amount <= 10000) return 50;
+            if (amount <= 100000) return amount * 0.025 - 200;
+            if (amount <= 200000) return amount * 0.02 + 300;
+            if (amount <= 500000) return amount * 0.015 + 1300;
+            if (amount <= 1000000) return amount * 0.01 + 3800;
+            if (amount <= 2000000) return amount * 0.009 + 4800;
+            if (amount <= 5000000) return amount * 0.008 + 6800;
+            if (amount <= 10000000) return amount * 0.007 + 11800;
+            if (amount <= 20000000) return amount * 0.006 + 21800;
+            return amount * 0.005 + 41800;
+        }
+
+        function calculateLawyerFee(amount, region, stage, discount) {
+            if (amount <= 0) return 0;
+            
+            // 基础费率参考标准（简化版）
+            let rate = 0;
+            if (amount <= 100000) {
+                rate = 0.08; // 8%
+            } else if (amount <= 1000000) {
+                rate = 0.06; // 6%
+            } else if (amount <= 10000000) {
+                rate = 0.04; // 4%
+            } else {
+                rate = 0.02; // 2%
+            }
+            
+            // 地区调整系数
+            let regionFactor = 1;
+            if (region === 'beijing') regionFactor = 1.2;
+            else if (region === 'province') regionFactor = 1.0;
+            else regionFactor = 0.8;
+            
+            // 阶段倍数
+            let stageFactor = 1;
+            if (stage === 'two') stageFactor = 1.8;
+            else if (stage === 'full') stageFactor = 2.5;
+            else if (stage === 'arbitration') stageFactor = 1.5;
+            
+            let fee = amount * rate * regionFactor * stageFactor * discount;
+            
+            // 最低收费限制
+            const minFee = 5000 * stageFactor * discount;
+            if (fee < minFee) fee = minFee;
+            
+            return fee;
+        }
+
+        function calculateAll() {
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
+            const region = document.getElementById('region').value;
+            const stage = document.getElementById('stage').value;
+            const discount = parseFloat(document.getElementById('discount').value);
+            const isRisk = document.getElementById('riskAgent').checked;
+            
+            // 计算诉讼费
+            const courtFee = calculateCourtFee(amount);
+            
+            // 计算律师费
+            let lawyerFee = 0;
+            let lawyerNote = '';
+            
+            if (currentMode === 'ratio') {
+                lawyerFee = calculateLawyerFee(amount, region, stage, discount);
+                
+                const stageNames = {
+                    'one': '一审阶段',
+                    'two': '一审+二审',
+                    'full': '一审+二审+执行',
+                    'arbitration': '仲裁案件'
+                };
+                
+                const discountNames = {
+                    '1': '标准收费',
+                    '0.9': '9折优惠',
+                    '0.8': '8折优惠',
+                    '0.7': '7折优惠',
+                    '0.6': '6折优惠',
+                    '0.5': '5折优惠'
+                };
+                
+                lawyerNote = `${stageNames[stage]} · ${discountNames[discount]}`;
+                
+                // 风险代理计算
+                if (isRisk) {
+                    const riskRate = parseFloat(document.getElementById('riskRate').value) || 0;
+                    const riskFee = amount * (riskRate / 100);
+                    // 风险代理不能超过30%
+                    const maxRisk = amount * 0.3;
+                    lawyerFee = Math.min(riskFee, maxRisk);
+                    lawyerNote = `风险代理（${riskRate}%）`;
+                }
+            } else {
+                lawyerFee = parseFloat(document.getElementById('fixedAmount').value) || 0;
+                lawyerNote = '固定收费';
+            }
+            
+            // 显示结果
+            document.getElementById('courtFeeDisplay').textContent = formatMoney(courtFee);
+            document.getElementById('lawyerFeeDisplay').textContent = formatMoney(lawyerFee);
+            document.getElementById('lawyerFeeNote').textContent = lawyerNote;
+            
+            const totalCost = courtFee + lawyerFee;
+            document.getElementById('totalCostDisplay').textContent = formatMoney(totalCost);
+            
+            // 打印数据
+            document.getElementById('printAmount').textContent = formatMoney(amount);
+            document.getElementById('printCourtFee').textContent = formatMoney(courtFee);
+            document.getElementById('printLawyerFee').textContent = formatMoney(lawyerFee);
+            document.getElementById('printTotal').textContent = formatMoney(totalCost);
+            
+            // 更新图表
+            updateChart(courtFee, lawyerFee);
+            
+            // 更新明细表
+            updateDetailTable(amount, courtFee, lawyerFee, totalCost);
+        }
+
+        function updateChart(courtFee, lawyerFee) {
+            const ctx = document.getElementById('feeChart').getContext('2d');
+            
+            if (feeChart) {
+                feeChart.destroy();
+            }
+            
+            feeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['法院诉讼费', '律师代理费'],
+                    datasets: [{
+                        data: [courtFee, lawyerFee],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(99, 102, 241, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(59, 130, 246)',
+                            'rgb(99, 102, 241)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += formatMoney(context.parsed);
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateDetailTable(amount, courtFee, lawyerFee, total) {
+            const tbody = document.getElementById('detailTable');
+            tbody.innerHTML = '';
+            
+            const rows = [
+                ['案件标的额', '-', formatMoney(amount)],
+                ['法院案件受理费', '按《诉讼费用交纳办法》分段累计', formatMoney(courtFee)],
+                ['律师代理费', currentMode === 'ratio' ? '按标的额比例×地区系数×阶段系数' : '双方协商固定金额', formatMoney(lawyerFee)],
+                ['费用合计', '-', `<strong>${formatMoney(total)}</strong>`]
+            ];
+            
+            rows.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = index === 3 ? 'bg-indigo-50 font-medium' : 'hover:bg-slate-50';
+                tr.innerHTML = `
+                    <td class="px-4 py-3 text-slate-900">${row[0]}</td>
+                    <td class="px-4 py-3 text-right text-slate-500 text-xs">${row[1]}</td>
+                    <td class="px-4 py-3 text-right font-mono text-slate-900">${row[2]}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function toggleView(view) {
+            const chartView = document.getElementById('chartView');
+            const tableView = document.getElementById('tableView');
+            const btnChart = document.getElementById('btnChart');
+            const btnTable = document.getElementById('btnTable');
+            
+            if (view === 'chart') {
+                chartView.classList.remove('hidden');
+                tableView.classList.add('hidden');
+                btnChart.classList.add('bg-indigo-100', 'text-indigo-700');
+                btnChart.classList.remove('text-slate-600', 'hover:bg-slate-100');
+                btnTable.classList.remove('bg-indigo-100', 'text-indigo-700');
+                btnTable.classList.add('text-slate-600', 'hover:bg-slate-100');
+            } else {
+                chartView.classList.add('hidden');
+                tableView.classList.remove('hidden');
+                btnTable.classList.add('bg-indigo-100', 'text-indigo-700');
+                btnTable.classList.remove('text-slate-600', 'hover:bg-slate-100');
+                btnChart.classList.remove('bg-indigo-100', 'text-indigo-700');
+                btnChart.classList.add('text-slate-600', 'hover:bg-slate-100');
+            }
+        }
+
+        function resetAll() {
+            document.getElementById('amount').value = '';
+            document.getElementById('caseType').value = 'property';
+            document.getElementById('region').value = 'beijing';
+            document.getElementById('stage').value = 'one';
+            document.getElementById('discount').value = '1';
+            document.getElementById('riskAgent').checked = false;
+            document.getElementById('riskSettings').classList.add('hidden');
+            document.getElementById('fixedAmount').value = '';
+            setFeeMode('ratio');
+            calculateAll();
+        }
+
+        function toggleFields() {
+            const caseType = document.getElementById('caseType').value;
+            const regionSelect = document.getElementById('regionSelect');
+            
+            if (caseType === 'nonProperty' || caseType === 'labor') {
+                regionSelect.classList.add('opacity-50');
+            } else {
+                regionSelect.classList.remove('opacity-50');
+            }
+            
+            calculateAll();
+        }
+
+        // 初始化
+        window.onload = function() {
+            calculateAll();
+        };
+    </script>
+</body>
+</html>
