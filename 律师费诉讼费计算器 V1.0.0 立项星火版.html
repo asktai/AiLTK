@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>律师费诉讼费计算器 V1.0.0 | 立项星火版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 
+    =====================================================
+    版本更新注释 - V1.0.0（立项星火版）
+    作者：芭比娃娃的爸比
+    项目地址：https://github.com/asktai/AiLTK
+    在线版：https://asktai.github.io/AiLTK/
+    
+    更新说明：
+    1. 新增保全保险费计算功能（支持自定义费率和封顶设置）
+    2. 新增主页抬头导航栏（作者链接、版本号、在线版/备用地址/其它项目）
+    3. 新增多格式导出功能（支持导出TXT/Markdown/Word格式报告）
+    4. 新增广东省律师收费标准精确计算（依据粤价〔2006〕298号）
+    5. 新增预留链接1-5占位（用于后续扩展）
+    6. 优化界面布局，增加版本标识和项目导航
+    
+    历史版本：
+    - V0.9.0：基础功能版（律师费+诉讼费双计算）
+    =====================================================
+    -->
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .serif { font-family: 'Noto Serif SC', serif; }
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .result-card {
+            transition: all 0.3s ease;
+        }
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; }
+        }
+        .province-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .export-btn {
+            transition: all 0.2s;
+        }
+        .export-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .header-link {
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+        .header-link:hover {
+            border-bottom-color: #667eea;
+            color: #667eea;
+        }
+        .version-badge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen text-slate-800">
+
+    <!-- 顶部导航栏 - 项目信息 -->
+    <div class="bg-slate-900 text-white text-xs py-2 px-4 no-print">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-4 flex-wrap">
+                <span class="font-bold text-slate-300">律师费诉讼费计算器</span>
+                <span class="version-badge">V1.0.0 立项星火版</span>
+                <span class="text-slate-400">|</span>
+                <a href="https://github.com/asktai/AiLTK" target="_blank" class="header-link text-slate-300 hover:text-white flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    点击作者：芭比娃娃的爸比
+                </a>
+            </div>
+            <div class="flex items-center gap-3 flex-wrap">
+                <a href="https://asktai.github.io/AiLTK/" target="_blank" class="header-link text-slate-300 hover:text-white">在线版</a>
+                <span class="text-slate-600">|</span>
+                <a href="https://asktai.github.io/AiLTK/" target="_blank" class="header-link text-slate-300 hover:text-white">备用地址</a>
+                <span class="text-slate-600">|</span>
+                <a href="https://asktai.github.io/KSCTJ/" target="_blank" class="header-link text-slate-300 hover:text-white">其它项目</a>
+                <span class="text-slate-600">|</span>
+                <span class="text-slate-500">预留链接：</span>
+                <a href="#" class="text-slate-500 hover:text-slate-300" onclick="alert('链接1预留位置')">链接1</a>
+                <a href="#" class="text-slate-500 hover:text-slate-300" onclick="alert('链接2预留位置')">链接2</a>
+                <a href="#" class="text-slate-500 hover:text-slate-300" onclick="alert('链接3预留位置')">链接3</a>
+                <a href="#" class="text-slate-500 hover:text-slate-300" onclick="alert('链接4预留位置')">链接4</a>
+                <a href="#" class="text-slate-500 hover:text-slate-300" onclick="alert('链接5预留位置')">链接5</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50 no-print">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                    法
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900">律师费诉讼费计算器</h1>
+                    <div class="flex items-center gap-2 text-xs text-slate-500">
+                        <span>支持全国多省市标准</span>
+                        <span class="province-tag" id="currentProvinceTag">广东省标准</span>
+                        <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">保全保险</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <div class="relative group">
+                    <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors flex items-center gap-2 export-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        导出报告
+                    </button>
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-slate-200 hidden group-hover:block z-50">
+                        <div class="py-1">
+                            <button onclick="exportReport('txt')" class="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">导出为 TXT</button>
+                            <button onclick="exportReport('md')" class="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">导出为 Markdown</button>
+                            <button onclick="exportReport('doc')" class="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">导出为 Word (.doc)</button>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="window.print()" class="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm hover:bg-slate-800 transition-colors flex items-center gap-2 no-print">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    打印/PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8 grid lg:grid-cols-3 gap-6">
+        
+        <!-- Input Section -->
+        <div class="lg:col-span-1 space-y-6 no-print">
+            <!-- Location Settings -->
+            <div class="glass rounded-2xl p-6 shadow-lg border-l-4 border-indigo-500">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-sm">1</span>
+                    地区设置
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">选择省份/地区</label>
+                        <select id="province" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all bg-white" onchange="changeProvince()">
+                            <option value="guangdong" selected>广东省（粤价〔2006〕298号）</option>
+                            <option value="beijing">北京市</option>
+                            <option value="shanghai">上海市</option>
+                            <option value="jiangsu">江苏省</option>
+                            <option value="zhejiang">浙江省</option>
+                            <option value="national">全国通用参考</option>
+                        </select>
+                        <p class="text-xs text-slate-500 mt-1" id="provinceDesc">依据《广东省律师服务政府指导价》计算</p>
+                    </div>
+
+                    <div id="guangdongSettings" class="bg-indigo-50 rounded-lg p-3 border border-indigo-100">
+                        <h4 class="text-xs font-bold text-indigo-900 mb-2">广东省收费结构</h4>
+                        <ul class="text-xs text-indigo-800 space-y-1">
+                            <li>• 基础费用：1000-8000元（固定）</li>
+                            <li>• 5万以下：免加收（仅基础费）</li>
+                            <li>• 5-10万：8% | 10-50万：5%</li>
+                            <li>• 50-100万：4% | 100-500万：3%</li>
+                            <li>• 500-1000万：2% | 1000-5000万：1%</li>
+                            <li>• 5000万以上：0.5%</li>
+                            <li>• 允许浮动：±20%</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Case Settings -->
+            <div class="glass rounded-2xl p-6 shadow-lg">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm">2</span>
+                    案件信息
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">案件类型</label>
+                        <select id="caseType" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" onchange="toggleFields()">
+                            <option value="property">财产案件（民事/商事）</option>
+                            <option value="civil_no_property">民事案件（不涉及财产）</option>
+                            <option value="criminal">刑事案件</option>
+                            <option value="administrative">行政案件</option>
+                            <option value="labor">劳动争议</option>
+                        </select>
+                    </div>
+
+                    <div id="amountField">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">争议标的额 / 标的金额</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-2.5 text-slate-500">¥</span>
+                            <input type="number" id="amount" class="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" placeholder="输入金额（元）" oninput="calculateAll()">
+                        </div>
+                        <div class="flex gap-2 mt-2 flex-wrap">
+                            <button onclick="setPreset(50000)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded text-xs transition-colors">5万</button>
+                            <button onclick="setPreset(100000)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded text-xs transition-colors">10万</button>
+                            <button onclick="setPreset(500000)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded text-xs transition-colors">50万</button>
+                            <button onclick="setPreset(1000000)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded text-xs transition-colors">100万</button>
+                            <button onclick="setPreset(5000000)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded text-xs transition-colors">500万</button>
+                        </div>
+                    </div>
+
+                    <div id="criminalField" class="hidden">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">刑事阶段</label>
+                        <select id="criminalStage" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" onchange="calculateAll()">
+                            <option value="investigate">侦查阶段（2000-6000元）</option>
+                            <option value="prosecute">审查起诉阶段（6000-16000元）</option>
+                            <option value="trial">审判阶段（6000-33000元）</option>
+                            <option value="full">全程代理（协商）</option>
+                        </select>
+                    </div>
+
+                    <div id="noPropertyField" class="hidden">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">案件复杂程度</label>
+                        <select id="complexity" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" onchange="calculateAll()">
+                            <option value="simple">简单案件（3000-10000元）</option>
+                            <option value="normal" selected>一般案件（10000-20000元）</option>
+                            <option value="complex">复杂疑难案件（协商）</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insurance Settings - NEW -->
+            <div class="glass rounded-2xl p-6 shadow-lg border-l-4 border-amber-500">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-sm">3</span>
+                    保全保险费
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">申请保全金额</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-2.5 text-slate-500">¥</span>
+                            <input type="number" id="preserveAmount" class="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" placeholder="输入保全标的金额" oninput="calculateAll()">
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">诉讼财产保全责任保险保额</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">保险费率</label>
+                        <div class="grid grid-cols-3 gap-2 mb-2">
+                            <button onclick="setInsuranceRate(0.001)" class="px-2 py-1 bg-amber-50 border border-amber-200 rounded text-xs hover:bg-amber-100" id="rateBtn1">千分之一</button>
+                            <button onclick="setInsuranceRate(0.002)" class="px-2 py-1 bg-amber-50 border border-amber-200 rounded text-xs hover:bg-amber-100" id="rateBtn2">千分之二</button>
+                            <button onclick="setInsuranceRate(0.003)" class="px-2 py-1 bg-amber-50 border border-amber-200 rounded text-xs hover:bg-amber-100" id="rateBtn3">千分之三</button>
+                        </div>
+                        <div class="relative">
+                            <input type="number" id="insuranceRate" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" value="0.002" step="0.001" oninput="calculateAll()">
+                            <span class="absolute right-4 top-2.5 text-slate-500">%</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">最低保费/封顶</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="relative">
+                                <span class="absolute left-3 top-2 text-xs text-slate-500">最低</span>
+                                <input type="number" id="minInsurance" class="w-full pl-12 pr-2 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all text-sm" value="500" oninput="calculateAll()">
+                            </div>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2 text-xs text-slate-500">封顶</span>
+                                <input type="number" id="maxInsurance" class="w-full pl-12 pr-2 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all text-sm" value="50000" oninput="calculateAll()">
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">常见：最低500-1000元，封顶5万元</p>
+                    </div>
+
+                    <div class="bg-amber-50 rounded-lg p-3 border border-amber-100">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-amber-800">预估保费：</span>
+                            <span class="font-bold text-amber-900 text-lg" id="insuranceFeeQuick">¥0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fee Settings -->
+            <div class="glass rounded-2xl p-6 shadow-lg">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-sm">4</span>
+                    计费设置
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">诉讼阶段</label>
+                        <select id="stage" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" onchange="calculateAll()">
+                            <option value="one">一审阶段</option>
+                            <option value="two">一审+二审阶段</option>
+                            <option value="full">一审+二审+执行</option>
+                            <option value="arbitration">仲裁案件</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">浮动幅度（政府指导价允许±20%）</label>
+                        <select id="floatRate" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" onchange="calculateAll()">
+                            <option value="1.0">标准收费（100%）</option>
+                            <option value="1.2">上浮20%（最高限价）</option>
+                            <option value="1.1">上浮10%</option>
+                            <option value="0.9">下浮10%</option>
+                            <option value="0.8">下浮20%（优惠）</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">基础费用设定（广东省）</label>
+                        <select id="baseFeeLevel" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" onchange="calculateAll()">
+                            <option value="4000">低档：1000-4000元（简单案件）</option>
+                            <option value="6000" selected>中档：4000-6000元（一般案件）</option>
+                            <option value="8000">高档：6000-8000元（复杂案件）</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-200">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="riskAgent" class="w-4 h-4 text-indigo-600 rounded" onchange="toggleRisk()">
+                            <span class="text-sm text-slate-700">风险代理（最高不超过标的额30%）</span>
+                        </label>
+                        <div id="riskSettings" class="hidden mt-3 space-y-2">
+                            <input type="number" id="riskRate" class="w-full px-4 py-2 border border-slate-300 rounded-lg input-focus outline-none transition-all" placeholder="约定比例（%）" oninput="calculateAll()">
+                            <p class="text-xs text-amber-600">广东省风险代理建议：回款额的10-30%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Summary Cards -->
+            <div class="grid md:grid-cols-4 gap-4">
+                <div class="result-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white shadow-lg">
+                    <p class="text-blue-100 text-xs mb-1">法院诉讼费</p>
+                    <p class="text-2xl font-bold serif" id="courtFeeDisplay">¥0</p>
+                    <p class="text-blue-100 text-xs mt-1">案件受理费</p>
+                </div>
+                
+                <div class="result-card bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-5 text-white shadow-lg">
+                    <p class="text-indigo-100 text-xs mb-1">律师代理费</p>
+                    <p class="text-2xl font-bold serif" id="lawyerFeeDisplay">¥0</p>
+                    <p class="text-indigo-100 text-xs mt-1" id="lawyerFeeNote">广东省标准</p>
+                </div>
+
+                <div class="result-card bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-5 text-white shadow-lg">
+                    <p class="text-amber-100 text-xs mb-1">保全保险费</p>
+                    <p class="text-2xl font-bold serif" id="insuranceDisplay">¥0</p>
+                    <p class="text-amber-100 text-xs mt-1" id="insuranceRateDisplay">费率0.2%</p>
+                </div>
+
+                <div class="result-card bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl p-5 text-white shadow-lg">
+                    <p class="text-slate-300 text-xs mb-1">预计总成本</p>
+                    <p class="text-2xl font-bold serif" id="totalCostDisplay">¥0</p>
+                    <p class="text-slate-300 text-xs mt-1" id="totalNote">全包费用预估</p>
+                </div>
+            </div>
+
+            <!-- Calculation Details -->
+            <div class="glass rounded-2xl p-6 shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <span id="detailTitle">费用计算明细</span>
+                        <span class="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded">V1.0.0</span>
+                    </h3>
+                    <div class="flex gap-2">
+                        <button onclick="toggleView('chart')" id="btnChart" class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-sm font-medium">图表</button>
+                        <button onclick="toggleView('table')" id="btnTable" class="px-3 py-1 rounded-full text-slate-600 text-sm font-medium hover:bg-slate-100">明细表</button>
+                    </div>
+                </div>
+
+                <div id="chartView" class="h-64">
+                    <canvas id="feeChart"></canvas>
+                </div>
+
+                <div id="tableView" class="hidden space-y-4">
+                    <div class="overflow-hidden rounded-lg border border-slate-200">
+                        <table class="w-full text-sm">
+                            <thead class="bg-slate-50 text-slate-700">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">费用项目</th>
+                                    <th class="px-4 py-3 text-left">计算说明</th>
+                                    <th class="px-4 py-3 text-right">金额</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200" id="detailTable">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800" id="guangdongNotice">
+                        <p class="font-bold mb-1">📋 计算依据说明</p>
+                        <ul class="list-disc list-inside space-y-1 text-xs">
+                            <li><strong>诉讼费：</strong>国务院《诉讼费用交纳办法》（国务院令第481号）</li>
+                            <li><strong>律师费：</strong>《广东省物价局、司法厅律师服务收费管理实施办法》（粤价〔2006〕298号）</li>
+                            <li><strong>保全保险：</strong>诉讼财产保全责任保险费率通常为保全金额的0.1%-0.5%（千分之一到千分之五），最低收费500-1000元，封顶通常5万元</li>
+                            <li>政府指导价允许上下浮动20%，实际收费以委托合同为准</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Version Info Card -->
+            <div class="glass rounded-2xl p-6 shadow-lg border-l-4 border-pink-500 bg-gradient-to-r from-pink-50 to-white">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-pink-900 mb-1">V1.0.0 立项星火版</h4>
+                        <p class="text-sm text-pink-700 mb-2">全新上线的诉讼成本综合计算器</p>
+                        <div class="grid md:grid-cols-2 gap-4 text-xs text-slate-600">
+                            <div>
+                                <p class="font-semibold mb-1">本次更新：</p>
+                                <ul class="space-y-1">
+                                    <li>• 新增保全保险费计算（诉责险）</li>
+                                    <li>• 新增主页抬头导航与项目链接</li>
+                                    <li>• 新增多格式导出（TXT/MD/Word）</li>
+                                    <li>• 新增广东省律师收费精确计算</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <p class="font-semibold mb-1">项目信息：</p>
+                                <ul class="space-y-1">
+                                    <li>• 作者：<a href="https://github.com/asktai/AiLTK" target="_blank" class="text-pink-600 hover:underline">芭比娃娃的爸比</a></li>
+                                    <li>• 开源：<a href="https://github.com/asktai/AiLTK" target="_blank" class="text-pink-600 hover:underline">github.com/asktai/AiLTK</a></li>
+                                    <li>• 在线：<a href="https://asktai.github.io/AiLTK/" target="_blank" class="text-pink-600 hover:underline">asktai.github.io/AiLTK</a></li>
+                                    <li>• 其它：<a href="https://asktai.github.io/KSCTJ/" target="_blank" class="text-pink-600 hover:underline">KSCTJ项目</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legal Notice -->
+            <div class="glass rounded-2xl p-6 shadow-lg">
+                <h3 class="text-lg font-bold mb-4">标准说明与法规依据</h3>
+                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <h4 class="font-bold text-blue-700 mb-2">诉讼费标准</h4>
+                        <div class="space-y-1 text-slate-600 text-xs">
+                            <p>依据国务院令第481号《诉讼费用交纳办法》</p>
+                            <p>• ≤1万元：50元</p>
+                            <p>• 1-10万元：2.5%</p>
+                            <p>• 10-20万元：2%</p>
+                            <p>• 20-50万元：1.5%</p>
+                            <p>• 50-100万元：1%</p>
+                            <p>由败诉方承担（原则上）</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-indigo-700 mb-2">广东省律师费</h4>
+                        <div class="space-y-1 text-slate-600 text-xs">
+                            <p>依据粤价〔2006〕298号</p>
+                            <p>基础费：1000-8000元</p>
+                            <p>分段累进费率：</p>
+                            <p>• 5-10万：8%</p>
+                            <p>• 10-50万：5%</p>
+                            <p>• 50-100万：4%</p>
+                            <p>• 100万以上递减</p>
+                            <p>允许浮动±20%</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-amber-700 mb-2">保全保险费</h4>
+                        <div class="space-y-1 text-slate-600 text-xs">
+                            <p>诉讼财产保全责任险</p>
+                            <p>• 费率：0.1%-0.5%</p>
+                            <p>• 最低：500-1000元</p>
+                            <p>• 封顶：通常5万元</p>
+                            <p>• 按保全金额计算</p>
+                            <p>由申请人预付</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        /*
+         * 版本信息：V1.0.0（立项星火版）
+         * 作者：芭比娃娃的爸比
+         * 项目地址：https://github.com/asktai/AiLTK
+         * 在线版：https://asktai.github.io/AiLTK/
+         * 
+         * 更新说明：
+         * 1. 新增保全保险费计算功能，支持自定义费率、最低保费和封顶设置
+         * 2. 新增主页抬头导航栏，包含作者链接、版本号、在线版/备用地址/其它项目链接
+         * 3. 新增预留链接1-5占位功能，便于后续扩展导航
+         * 4. 新增多格式导出功能，支持导出TXT、Markdown、Word格式费用报告
+         * 5. 新增广东省律师收费标准精确计算（依据粤价〔2006〕298号，基础费+分段累进）
+         * 6. 界面优化：四栏布局显示（诉讼费/律师费/保全保险/总成本）
+         * 7. 增加版本标识卡片，显示项目信息和更新日志
+         * 
+         * 技术栈：HTML5 + Tailwind CSS + Chart.js
+         * 许可证：MIT License
+         */
+
+        let feeChart = null;
+        let currentProvince = 'guangdong';
+        
+        // 广东省收费标准（粤价〔2006〕298号）
+        const guangdongStandard = {
+            baseFee: { min: 1000, max: 8000, default: 6000 },
+            tiers: [
+                { limit: 50000, rate: 0 },
+                { limit: 100000, rate: 0.08 },
+                { limit: 500000, rate: 0.05 },
+                { limit: 1000000, rate: 0.04 },
+                { limit: 5000000, rate: 0.03 },
+                { limit: 10000000, rate: 0.02 },
+                { limit: 50000000, rate: 0.01 },
+                { limit: Infinity, rate: 0.005 }
+            ],
+            floatRange: 0.2
+        };
+
+        const otherStandards = {
+            beijing: {
+                name: '北京市',
+                tiers: [
+                    { limit: 100000, rate: 0.10 },
+                    { limit: 1000000, rate: 0.06 },
+                    { limit: 10000000, rate: 0.04 },
+                    { limit: Infinity, rate: 0.02 }
+                ]
+            },
+            shanghai: {
+                name: '上海市',
+                tiers: [
+                    { limit: 100000, rate: 0.08 },
+                    { limit: 1000000, rate: 0.05 },
+                    { limit: 10000000, rate: 0.03 },
+                    { limit: Infinity, rate: 0.015 }
+                ]
+            },
+            national: {
+                name: '全国通用',
+                tiers: [
+                    { limit: 100000, rate: 0.08 },
+                    { limit: 1000000, rate: 0.06 },
+                    { limit: 10000000, rate: 0.04 },
+                    { limit: Infinity, rate: 0.02 }
+                ]
+            }
+        };
+
+        function formatMoney(amount) {
+            return '¥' + amount.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+        }
+
+        function setPreset(amount) {
+            document.getElementById('amount').value = amount;
+            // 同步更新保全金额（如果为空）
+            if (!document.getElementById('preserveAmount').value) {
+                document.getElementById('preserveAmount').value = amount;
+            }
+            calculateAll();
+        }
+
+        function setInsuranceRate(rate) {
+            document.getElementById('insuranceRate').value = rate;
+            // 更新按钮样式
+            document.getElementById('rateBtn1').classList.toggle('bg-amber-200', rate === 0.001);
+            document.getElementById('rateBtn2').classList.toggle('bg-amber-200', rate === 0.002);
+            document.getElementById('rateBtn3').classList.toggle('bg-amber-200', rate === 0.003);
+            calculateAll();
+        }
+
+        function changeProvince() {
+            currentProvince = document.getElementById('province').value;
+            const tag = document.getElementById('currentProvinceTag');
+            const desc = document.getElementById('provinceDesc');
+            const gdSettings = document.getElementById('guangdongSettings');
+            const detailTitle = document.getElementById('detailTitle');
+            
+            const names = {
+                guangdong: '广东省标准',
+                beijing: '北京市标准',
+                shanghai: '上海市标准',
+                jiangsu: '江苏省标准',
+                zhejiang: '浙江省标准',
+                national: '全国通用'
+            };
+            
+            tag.textContent = names[currentProvince] || '通用标准';
+            detailTitle.textContent = (names[currentProvince] || '全国') + '律师费计算明细';
+            
+            if (currentProvince === 'guangdong') {
+                desc.textContent = '依据《广东省律师服务政府指导价》（粤价〔2006〕298号）';
+                gdSettings.classList.remove('hidden');
+            } else {
+                desc.textContent = '依据当地律师收费指导标准（估算）';
+                gdSettings.classList.add('hidden');
+            }
+            
+            calculateAll();
+        }
+
+        function toggleRisk() {
+            const isRisk = document.getElementById('riskAgent').checked;
+            const riskSettings = document.getElementById('riskSettings');
+            if (isRisk) {
+                riskSettings.classList.remove('hidden');
+            } else {
+                riskSettings.classList.add('hidden');
+            }
+            calculateAll();
+        }
+
+        function toggleFields() {
+            const caseType = document.getElementById('caseType').value;
+            const amountField = document.getElementById('amountField');
+            const criminalField = document.getElementById('criminalField');
+            const noPropertyField = document.getElementById('noPropertyField');
+            
+            amountField.classList.remove('hidden');
+            criminalField.classList.add('hidden');
+            noPropertyField.classList.add('hidden');
+            
+            if (caseType === 'criminal') {
+                amountField.classList.add('hidden');
+                criminalField.classList.remove('hidden');
+            } else if (caseType === 'civil_no_property' || caseType === 'labor') {
+                amountField.classList.add('hidden');
+                noPropertyField.classList.remove('hidden');
+            } else if (caseType === 'administrative') {
+                noPropertyField.classList.remove('hidden');
+            }
+            
+            calculateAll();
+        }
+
+        function calculateCourtFee(amount) {
+            if (amount <= 0) return 0;
+            
+            if (amount <= 10000) return 50;
+            if (amount <= 100000) return amount * 0.025 - 200;
+            if (amount <= 200000) return amount * 0.02 + 300;
+            if (amount <= 500000) return amount * 0.015 + 1300;
+            if (amount <= 1000000) return amount * 0.01 + 3800;
+            if (amount <= 2000000) return amount * 0.009 + 4800;
+            if (amount <= 5000000) return amount * 0.008 + 6800;
+            if (amount <= 10000000) return amount * 0.007 + 11800;
+            if (amount <= 20000000) return amount * 0.006 + 21800;
+            return amount * 0.005 + 41800;
+        }
+
+        // 计算保全保险费
+        function calculateInsuranceFee(amount, rate, minFee, maxFee) {
+            if (amount <= 0) return 0;
+            
+            let fee = amount * rate;
+            
+            // 应用最低和封顶
+            if (fee < minFee) fee = minFee;
+            if (fee > maxFee) fee = maxFee;
+            
+            return fee;
+        }
+
+        function calculateGuangdongFee(amount, baseFeeLevel, floatRate, stage) {
+            if (amount <= 0) return { total: 0, details: [] };
+            
+            let baseFee = parseInt(baseFeeLevel);
+            let details = [];
+            details.push({ label: '基础费用', desc: '根据案件复杂程度', amount: baseFee });
+            
+            let accumulated = 0;
+            let previousLimit = 0;
+            
+            for (let tier of guangdongStandard.tiers) {
+                if (amount > previousLimit) {
+                    let taxable = Math.min(amount, tier.limit) - previousLimit;
+                    if (taxable > 0 && tier.rate > 0) {
+                        let fee = taxable * tier.rate;
+                        accumulated += fee;
+                        details.push({
+                            label: `标的额分段`,
+                            desc: `${formatMoney(previousLimit)}-${formatMoney(Math.min(amount, tier.limit))} × ${(tier.rate * 100).toFixed(1)}%`,
+                            amount: fee
+                        });
+                    }
+                }
+                previousLimit = tier.limit;
+                if (previousLimit >= amount) break;
+            }
+            
+            let subtotal = baseFee + accumulated;
+            
+            let stageMultiplier = 1;
+            if (stage === 'two') stageMultiplier = 1.8;
+            else if (stage === 'full') stageMultiplier = 2.5;
+            else if (stage === 'arbitration') stageMultiplier = 1.5;
+            
+            if (stageMultiplier > 1) {
+                subtotal = subtotal * stageMultiplier;
+                details.push({
+                    label: '阶段调整',
+                    desc: `${stage === 'two' ? '一审+二审' : stage === 'full' ? '全阶段' : '仲裁'} ×${stageMultiplier}`,
+                    amount: subtotal - (baseFee + accumulated)
+                });
+            }
+            
+            let finalFee = subtotal * floatRate;
+            
+            return {
+                total: finalFee,
+                baseFee: baseFee,
+                tierFee: accumulated,
+                details: details,
+                subtotal: subtotal
+            };
+        }
+
+        function calculateOtherFee(amount, floatRate, stage) {
+            if (amount <= 0) return { total: 0, details: [] };
+            
+            let standard = otherStandards[currentProvince] || otherStandards.national;
+            let accumulated = 0;
+            let previousLimit = 0;
+            let details = [];
+            
+            for (let tier of standard.tiers) {
+                if (amount > previousLimit) {
+                    let taxable = Math.min(amount, tier.limit) - previousLimit;
+                    if (taxable > 0) {
+                        let fee = taxable * tier.rate;
+                        accumulated += fee;
+                        details.push({
+                            label: `分段计费`,
+                            desc: `${formatMoney(previousLimit)}-${formatMoney(Math.min(amount, tier.limit))} × ${(tier.rate * 100).toFixed(0)}%`,
+                            amount: fee
+                        });
+                    }
+                }
+                previousLimit = tier.limit;
+                if (previousLimit >= amount) break;
+            }
+            
+            let stageMultiplier = 1;
+            if (stage === 'two') stageMultiplier = 1.8;
+            else if (stage === 'full') stageMultiplier = 2.5;
+            else if (stage === 'arbitration') stageMultiplier = 1.5;
+            
+            let subtotal = accumulated * stageMultiplier;
+            let finalFee = subtotal * floatRate;
+            
+            return {
+                total: finalFee,
+                details: details,
+                subtotal: subtotal
+            };
+        }
+
+        function calculateAll() {
+            const caseType = document.getElementById('caseType').value;
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
+            const stage = document.getElementById('stage').value;
+            const floatRate = parseFloat(document.getElementById('floatRate').value);
+            const isRisk = document.getElementById('riskAgent').checked;
+            
+            // 保全保险参数
+            const preserveAmount = parseFloat(document.getElementById('preserveAmount').value) || 0;
+            const insuranceRate = parseFloat(document.getElementById('insuranceRate').value) || 0.002;
+            const minInsurance = parseFloat(document.getElementById('minInsurance').value) || 500;
+            const maxInsurance = parseFloat(document.getElementById('maxInsurance').value) || 50000;
+            
+            let courtFee = 0;
+            let lawyerFee = 0;
+            let lawyerDetails = [];
+            let lawyerNote = '';
+            
+            // 计算诉讼费
+            if (caseType === 'property' || (caseType === 'administrative' && amount > 0)) {
+                courtFee = calculateCourtFee(amount);
+            } else if (caseType === 'civil_no_property') {
+                courtFee = 50;
+            } else if (caseType === 'labor') {
+                courtFee = 10;
+            }
+            
+            // 计算律师费
+            if (caseType === 'criminal') {
+                const stage = document.getElementById('criminalStage').value;
+                const ranges = {
+                    investigate: [2000, 6000],
+                    prosecute: [6000, 16000],
+                    trial: [6000, 33000],
+                    full: [10000, 50000]
+                };
+                const [min, max] = ranges[stage];
+                lawyerFee = (min + max) / 2 * floatRate;
+                lawyerNote = `刑事案件${stage === 'investigate' ? '侦查' : stage === 'prosecute' ? '审查起诉' : stage === 'trial' ? '一审' : '全程'}阶段`;
+                lawyerDetails.push({ label: '计件收费', desc: `${formatMoney(min)}-${formatMoney(max)}（取中值）×${floatRate}`, amount: lawyerFee });
+                
+            } else if (caseType === 'civil_no_property' || (caseType === 'administrative' && amount === 0)) {
+                const complexity = document.getElementById('complexity').value;
+                const ranges = {
+                    simple: [3000, 10000],
+                    normal: [10000, 20000],
+                    complex: [20000, 50000]
+                };
+                const [min, max] = ranges[complexity];
+                lawyerFee = (min + max) / 2 * floatRate;
+                lawyerNote = complexity === 'simple' ? '简单案件' : complexity === 'normal' ? '一般案件' : '复杂案件';
+                lawyerDetails.push({ label: '计件收费', desc: `不涉及财产：${formatMoney(min)}-${formatMoney(max)} ×${floatRate}`, amount: lawyerFee });
+                
+            } else if (caseType === 'labor') {
+                lawyerFee = 5000 * floatRate;
+                lawyerNote = '劳动争议案件';
+                lawyerDetails.push({ label: '计件收费', desc: `参考标准 ×${floatRate}`, amount: lawyerFee });
+                
+            } else {
+                if (currentProvince === 'guangdong') {
+                    const baseFeeLevel = document.getElementById('baseFeeLevel').value;
+                    const result = calculateGuangdongFee(amount, baseFeeLevel, floatRate, stage);
+                    lawyerFee = result.total;
+                    lawyerDetails = result.details;
+                    lawyerNote = '广东省政府指导价（基础费+累进）';
+                } else {
+                    const result = calculateOtherFee(amount, floatRate, stage);
+                    lawyerFee = result.total;
+                    lawyerDetails = result.details;
+                    lawyerNote = `${otherStandards[currentProvince]?.name || '全国'}参考标准`;
+                }
+            }
+            
+            // 风险代理
+            if (isRisk && amount > 0) {
+                const riskRate = parseFloat(document.getElementById('riskRate').value) || 0;
+                const maxRisk = amount * 0.3;
+                const riskFee = Math.min(amount * (riskRate / 100), maxRisk);
+                lawyerFee = riskFee;
+                lawyerNote = `风险代理（${riskRate}%，封顶30%）`;
+                lawyerDetails = [{ label: '风险代理费', desc: `标的额${formatMoney(amount)} × ${riskRate}%（≤30%）`, amount: riskFee }];
+            }
+            
+            // 计算保全保险费
+            const insuranceFee = calculateInsuranceFee(preserveAmount, insuranceRate, minInsurance, maxInsurance);
+            
+            // 显示结果
+            document.getElementById('courtFeeDisplay').textContent = formatMoney(courtFee);
+            document.getElementById('lawyerFeeDisplay').textContent = formatMoney(lawyerFee);
+            document.getElementById('lawyerFeeNote').textContent = lawyerNote;
+            document.getElementById('insuranceDisplay').textContent = formatMoney(insuranceFee);
+            document.getElementById('insuranceRateDisplay').textContent = `费率${(insuranceRate * 100).toFixed(1)}%`;
+            document.getElementById('insuranceFeeQuick').textContent = formatMoney(insuranceFee);
+            
+            const totalCost = courtFee + lawyerFee + insuranceFee;
+            document.getElementById('totalCostDisplay').textContent = formatMoney(totalCost);
+            
+            // 更新明细表
+            updateDetailTable(courtFee, lawyerFee, insuranceFee, lawyerDetails, totalCost, preserveAmount, insuranceRate);
+            
+            // 更新图表（四部分）
+            updateChart(courtFee, lawyerFee, insuranceFee);
+            
+            // 保存数据
+            window.currentCalculation = {
+                province: currentProvince,
+                caseType: caseType,
+                amount: amount,
+                courtFee: courtFee,
+                lawyerFee: lawyerFee,
+                insuranceFee: insuranceFee,
+                preserveAmount: preserveAmount,
+                insuranceRate: insuranceRate,
+                total: totalCost,
+                details: lawyerDetails,
+                note: lawyerNote,
+                date: new Date().toLocaleString('zh-CN'),
+                version: 'V1.0.0（立项星火版）',
+                author: '芭比娃娃的爸比'
+            };
+        }
+
+        function updateDetailTable(courtFee, lawyerFee, insuranceFee, lawyerDetails, total, preserveAmount, rate) {
+            const tbody = document.getElementById('detailTable');
+            tbody.innerHTML = '';
+            
+            // 诉讼费
+            const courtRow = document.createElement('tr');
+            courtRow.className = 'hover:bg-slate-50';
+            courtRow.innerHTML = `
+                <td class="px-4 py-3 text-slate-900 font-medium">法院案件受理费</td>
+                <td class="px-4 py-3 text-slate-500 text-xs">国务院《诉讼费用交纳办法》分段累进</td>
+                <td class="px-4 py-3 text-right font-mono text-slate-900">${formatMoney(courtFee)}</td>
+            `;
+            tbody.appendChild(courtRow);
+            
+            // 律师费明细
+            if (lawyerDetails.length > 0) {
+                lawyerDetails.forEach((detail, index) => {
+                    const row = document.createElement('tr');
+                    row.className = index % 2 === 0 ? 'bg-indigo-50/30' : 'hover:bg-slate-50';
+                    row.innerHTML = `
+                        <td class="px-4 py-3 text-slate-900">${detail.label}</td>
+                        <td class="px-4 py-3 text-slate-500 text-xs">${detail.desc}</td>
+                        <td class="px-4 py-3 text-right font-mono text-slate-900">${formatMoney(detail.amount)}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } else {
+                const row = document.createElement('tr');
+                row.className = 'bg-indigo-50/30';
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-slate-900">律师代理费</td>
+                    <td class="px-4 py-3 text-slate-500 text-xs">根据地区标准估算</td>
+                    <td class="px-4 py-3 text-right font-mono text-slate-900">${formatMoney(lawyerFee)}</td>
+                `;
+                tbody.appendChild(row);
+            }
+            
+            // 保全保险费
+            if (preserveAmount > 0) {
+                const insRow = document.createElement('tr');
+                insRow.className = 'bg-amber-50/30';
+                insRow.innerHTML = `
+                    <td class="px-4 py-3 text-slate-900">保全保险费</td>
+                    <td class="px-4 py-3 text-slate-500 text-xs">保全额${formatMoney(preserveAmount)} × ${(rate * 100).toFixed(1)}%</td>
+                    <td class="px-4 py-3 text-right font-mono text-slate-900">${formatMoney(insuranceFee)}</td>
+                `;
+                tbody.appendChild(insRow);
+            }
+            
+            // 合计
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'bg-slate-100 font-bold border-t-2 border-slate-200';
+            totalRow.innerHTML = `
+                <td class="px-4 py-3 text-slate-900">费用合计</td>
+                <td class="px-4 py-3 text-slate-500 text-xs">诉讼费+律师费+保全保险</td>
+                <td class="px-4 py-3 text-right font-mono text-lg text-indigo-700">${formatMoney(total)}</td>
+            `;
+            tbody.appendChild(totalRow);
+        }
+
+        function updateChart(courtFee, lawyerFee, insuranceFee) {
+            const ctx = document.getElementById('feeChart').getContext('2d');
+            
+            if (feeChart) {
+                feeChart.destroy();
+            }
+            
+            feeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['法院诉讼费', '律师代理费', '保全保险费'],
+                    datasets: [{
+                        data: [courtFee, lawyerFee, insuranceFee],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(99, 102, 241, 0.8)',
+                            'rgba(245, 158, 11, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(59, 130, 246)',
+                            'rgb(99, 102, 241)',
+                            'rgb(245, 158, 11)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += formatMoney(context.parsed);
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function toggleView(view) {
+            const chartView = document.getElementById('chartView');
+            const tableView = document.getElementById('tableView');
+            const btnChart = document.getElementById('btnChart');
+            const btnTable = document.getElementById('btnTable');
+            
+            if (view === 'chart') {
+                chartView.classList.remove('hidden');
+                tableView.classList.add('hidden');
+                btnChart.classList.add('bg-indigo-100', 'text-indigo-700');
+                btnChart.classList.remove('text-slate-600', 'hover:bg-slate-100');
+                btnTable.classList.remove('bg-indigo-100', 'text-indigo-700');
+                btnTable.classList.add('text-slate-600', 'hover:bg-slate-100');
+            } else {
+                chartView.classList.add('hidden');
+                tableView.classList.remove('hidden');
+                btnTable.classList.add('bg-indigo-100', 'text-indigo-700');
+                btnTable.classList.remove('text-slate-600', 'hover:bg-slate-100');
+                btnChart.classList.remove('bg-indigo-100', 'text-indigo-700');
+                btnChart.classList.add('text-slate-600', 'hover:bg-slate-100');
+            }
+        }
+
+        // 导出功能（包含版本信息）
+        function exportReport(format) {
+            const data = window.currentCalculation;
+            if (!data || (data.amount === 0 && data.preserveAmount === 0)) {
+                alert('请先输入标的金额或保全金额进行计算');
+                return;
+            }
+            
+            const provinceNames = {
+                guangdong: '广东省',
+                beijing: '北京市',
+                shanghai: '上海市',
+                jiangsu: '江苏省',
+                zhejiang: '浙江省',
+                national: '全国通用'
+            };
+            
+            const caseTypeNames = {
+                property: '财产案件',
+                civil_no_property: '民事案件（不涉及财产）',
+                criminal: '刑事案件',
+                administrative: '行政案件',
+                labor: '劳动争议'
+            };
+            
+            let content = '';
+            let filename = '';
+            let mimeType = '';
+            
+            if (format === 'txt') {
+                content = generateTXT(data, provinceNames, caseTypeNames);
+                filename = `律师费计算报告_V1.0.0_${data.province}_${new Date().getTime()}.txt`;
+                mimeType = 'text/plain;charset=utf-8';
+            } else if (format === 'md') {
+                content = generateMD(data, provinceNames, caseTypeNames);
+                filename = `律师费计算报告_V1.0.0_${data.province}_${new Date().getTime()}.md`;
+                mimeType = 'text/markdown;charset=utf-8';
+            } else if (format === 'doc') {
+                content = generateDOC(data, provinceNames, caseTypeNames);
+                filename = `律师费计算报告_V1.0.0_${data.province}_${new Date().getTime()}.doc`;
+                mimeType = 'application/msword;charset=utf-8';
+            }
+            
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function generateTXT(data, provinceNames, caseTypeNames) {
+            return `律师费诉讼费计算器 费用报告
+===================================================
+版本：V1.0.0（立项星火版）
+作者：芭比娃娃的爸比
+项目：https://github.com/asktai/AiLTK
+生成时间：${data.date}
+===================================================
+
+【案件信息】
+适用地区：${provinceNames[data.province]}
+案件类型：${caseTypeNames[data.caseType]}
+标的金额：${formatMoney(data.amount)}
+保全金额：${formatMoney(data.preserveAmount)}
+
+【费用计算结果】
+1. 法院案件受理费：${formatMoney(data.courtFee)}
+2. 律师代理费：${formatMoney(data.lawyerFee)}
+   说明：${data.note}
+3. 保全保险费：${formatMoney(data.insuranceFee)}
+   费率：${(data.insuranceRate * 100).toFixed(1)}%
+
+【费用汇总】
+诉讼费：${formatMoney(data.courtFee)}
+律师费：${formatMoney(data.lawyerFee)}
+保全险：${formatMoney(data.insuranceFee)}
+------------------------
+总计：${formatMoney(data.total)}
+
+【计算依据】
+1. 诉讼费：国务院《诉讼费用交纳办法》（国务院令第481号）
+2. 律师费：${data.province === 'guangdong' ? '《广东省物价局、司法厅律师服务收费管理实施办法》（粤价〔2006〕298号）' : '当地律师服务收费指导标准'}
+   - 基础费用：1000-8000元
+   - 分段累进费率（5万以下免加收，5-10万8%，10-50万5%，递减）
+   - 允许浮动幅度：±20%
+3. 保全保险：诉讼财产保全责任保险
+   - 参考费率：0.1%-0.5%
+   - 最低收费：500-1000元
+   - 封顶收费：通常5万元
+
+【重要提示】
+1. 诉讼费由原告预交，最终由败诉方承担
+2. 律师费原则上由聘请方自行承担，特定案件可主张败诉方承担
+3. 保全保险费由申请人预付，胜诉后可主张对方承担
+4. 实际收费可在政府指导价规定幅度内协商确定
+5. 本计算结果仅供参考，具体以实际合同和法院判决为准
+
+===================================================
+Generated by 律师费诉讼费计算器 V1.0.0
+作者：芭比娃娃的爸比
+项目地址：https://github.com/asktai/AiLTK
+在线使用：https://asktai.github.io/AiLTK/
+===================================================`;
+        }
+
+        function generateMD(data, provinceNames, caseTypeNames) {
+            let detailsTable = '';
+            if (data.details && data.details.length > 0) {
+                detailsTable = '| 收费项目 | 计算说明 | 金额 |\n|---------|---------|------|\n';
+                data.details.forEach(d => {
+                    detailsTable += `| ${d.label} | ${d.desc} | ${formatMoney(d.amount)} |\n`;
+                });
+            }
+            
+            return `# 律师费诉讼费计算报告
+
+![版本](https://img.shields.io/badge/版本-V1.0.0-星火版-pink)
+![作者](https://img.shields.io/badge/作者-芭比娃娃的爸比-blue)
+
+**生成时间**：${data.date}  
+**适用地区**：${provinceNames[data.province]}  
+**案件类型**：${caseTypeNames[data.caseType]}
+
+---
+
+## 案件信息
+
+- **标的金额**：${formatMoney(data.amount)}
+- **保全金额**：${formatMoney(data.preserveAmount)}
+- **计算版本**：V1.0.0（立项星火版）
+
+## 费用计算结果
+
+| 费用项目 | 金额 | 占比 | 说明 |
+|---------|------|------|------|
+| 法院案件受理费 | ${formatMoney(data.courtFee)} | ${data.total > 0 ? ((data.courtFee/data.total)*100).toFixed(1) : 0}% | 国务院令第481号 |
+| 律师代理费 | ${formatMoney(data.lawyerFee)} | ${data.total > 0 ? ((data.lawyerFee/data.total)*100).toFixed(1) : 0}% | ${data.note} |
+| 保全保险费 | ${formatMoney(data.insuranceFee)} | ${data.total > 0 ? ((data.insuranceFee/data.total)*100).toFixed(1) : 0}% | 费率${(data.insuranceRate * 100).toFixed(1)}% |
+| **合计** | **${formatMoney(data.total)}** | 100% | 预估总成本 |
+
+### 律师费计算明细
+${detailsTable}
+
+---
+
+## 计算依据与法规
+
+### 1. 法院诉讼费
+依据《诉讼费用交纳办法》（国务院令第481号）：
+- ≤1万元：50元
+- 1-10万元：2.5%
+- 10-20万元：2%
+- 20-50万元：1.5%
+- 50-100万元：1%
+- >100万元：递减费率
+
+### 2. 律师代理费
+${data.province === 'guangdong' ? `依据《广东省物价局、司法厅律师服务收费管理实施办法》（粤价〔2006〕298号）：
+
+**收费结构**：基础费用1000-8000元 + 标的额分段累进
+
+| 标的额区间 | 费率 | 说明 |
+|-----------|------|------|
+| ≤5万元 | 免加收 | 仅收基础费 |
+| 5-10万元 | 8% | - |
+| 10-50万元 | 5% | - |
+| 50-100万元 | 4% | - |
+| 100-500万元 | 3% | - |
+| 500-1000万元 | 2% | - |
+| 1000-5000万元 | 1% | - |
+| >5000万元 | 0.5% | - |
+
+**浮动幅度**：政府指导价允许上下浮动20%` : '依据当地律师服务收费指导标准计算'}
+
+### 3. 保全保险费
+诉讼财产保全责任保险参考标准：
+- **保险费率**：0.1% - 0.5%（千分之一到千分之五）
+- **最低收费**：500-1000元（不足按最低收取）
+- **封顶收费**：通常5万元（超过按封顶收取）
+- **计费基数**：申请保全金额
+
+---
+
+## 重要法律提示
+
+1. **诉讼费承担**：由原告预交，最终由败诉方承担；部分胜诉部分败诉的，由法院根据案件具体情况决定当事人各自负担的数额。
+
+2. **律师费承担**：原则上由聘请方自行承担。但以下情形可主张败诉方承担：
+   - 合同纠纷中明确约定由违约方承担
+   - 知识产权侵权案件
+   - 不正当竞争案件
+   - 恶意诉讼、虚假诉讼案件
+
+3. **保全保险费承担**：由申请人预付。胜诉后可根据《民法典》第1182条、第1284条及相关司法解释主张由败诉方承担合理维权费用。
+
+4. **风险提示**：实际律师收费可在政府指导价基准价基础上**上下浮动20%**范围内协商确定。风险代理收费最高不得超过收费合同约定标的额的**30%**。
+
+---
+
+## 项目信息
+
+- **工具名称**：律师费诉讼费计算器（立项星火版）
+- **版本号**：V1.0.0
+- **作者**：[芭比娃娃的爸比](https://github.com/asktai/AiLTK)
+- **开源地址**：https://github.com/asktai/AiLTK
+- **在线使用**：https://asktai.github.io/AiLTK/
+- **相关项目**：[KSCTJ](https://asktai.github.io/KSCTJ/)
+
+---
+
+*Generated by 律师费诉讼费计算器 V1.0.0（立项星火版）*`;
+        }
+
+        function generateDOC(data, provinceNames, caseTypeNames) {
+            const title = '律师费诉讼费计算报告';
+            const province = provinceNames[data.province];
+            const caseType = caseTypeNames[data.caseType];
+            
+            let detailsRows = '';
+            if (data.details && data.details.length > 0) {
+                data.details.forEach(d => {
+                    detailsRows += `<tr><td>${d.label}</td><td>${d.desc}</td><td>${formatMoney(d.amount)}</td></tr>`;
+                });
+            }
+            
+            const guangdongRules = data.province === 'guangdong' ? `
+                <h3>广东省律师服务政府指导价（粤价〔2006〕298号）</h3>
+                <p><strong>收费结构：</strong>基础费用1000-8000元 + 标的额分段累进</p>
+                <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+                    <tr style="background-color: #f5f5f5;"><th>标的额区间</th><th>费率</th><th>说明</th></tr>
+                    <tr><td>≤5万元</td><td>免加收</td><td>仅收基础费</td></tr>
+                    <tr><td>5-10万元</td><td>8%</td><td>-</td></tr>
+                    <tr><td>10-50万元</td><td>5%</td><td>-</td></tr>
+                    <tr><td>50-100万元</td><td>4%</td><td>-</td></tr>
+                    <tr><td>100-500万元</td><td>3%</td><td>-</td></tr>
+                    <tr><td>500-1000万元</td><td>2%</td><td>-</td></tr>
+                    <tr><td>1000-5000万元</td><td>1%</td><td>-</td></tr>
+                    <tr><td>>5000万元</td><td>0.5%</td><td>-</td></tr>
+                </table>
+                <p>允许浮动幅度：±20%</p>
+            ` : '<p>依据当地律师服务收费指导标准计算</p>';
+            
+            return `
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>${title}</title>
+<style>
+body { font-family: SimSun, "宋体", serif; font-size: 12pt; line-height: 1.6; }
+h1 { font-size: 18pt; text-align: center; color: #333; margin-bottom: 20px; }
+h2 { font-size: 14pt; color: #1e40af; margin-top: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px; }
+h3 { font-size: 12pt; color: #1e3a8a; margin-top: 15px; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 11pt; }
+th, td { border: 1px solid #999; padding: 8px; text-align: left; vertical-align: top; }
+th { background-color: #f3f4f6; font-weight: bold; }
+.total { font-weight: bold; color: #dc2626; font-size: 14pt; }
+.header-info { background-color: #fef3c7; padding: 10px; border-left: 4px solid #f59e0b; margin: 10px 0; }
+.version-box { text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 5px 10px; border-radius: 15px; font-size: 10pt; display: inline-block; margin: 5px 0; }
+</style>
+</head>
+<body>
+<h1>${title}</h1>
+
+<div style="text-align: center; margin-bottom: 20px;">
+    <span class="version-box">V1.0.0 立项星火版</span>
+    <p style="font-size: 10pt; color: #666; margin-top: 5px;">
+        作者：芭比娃娃的爸比 | 
+        项目：https://github.com/asktai/AiLTK
+    </p>
+</div>
+
+<div class="header-info">
+    <strong>生成时间：</strong>${data.date}<br>
+    <strong>适用地区：</strong>${province}<br>
+    <strong>案件类型：</strong>${caseType}<br>
+    <strong>标的金额：</strong>${formatMoney(data.amount)}<br>
+    <strong>保全金额：</strong>${formatMoney(data.preserveAmount)}
+</div>
+
+<h2>一、费用计算汇总</h2>
+<table>
+<tr style="background-color: #e0e7ff;"><th>费用项目</th><th>计算依据</th><th>金额</th></tr>
+<tr><td>法院案件受理费</td><td>国务院《诉讼费用交纳办法》</td><td>${formatMoney(data.courtFee)}</td></tr>
+${detailsRows}
+<tr><td>保全保险费</td><td>保全额${formatMoney(data.preserveAmount)} × ${(data.insuranceRate * 100).toFixed(1)}%</td><td>${formatMoney(data.insuranceFee)}</td></tr>
+<tr class="total"><td colspan="2">合计</td><td>${formatMoney(data.total)}</td></tr>
+</table>
+
+<h2>二、计算依据</h2>
+
+<h3>1. 法院诉讼费</h3>
+<p>依据《诉讼费用交纳办法》（国务院令第481号）分段累进计算。</p>
+
+<h3>2. 律师代理费</h3>
+${guangdongRules}
+
+<h3>3. 保全保险费</h3>
+<p>诉讼财产保全责任保险费率通常为<strong>0.1%-0.5%</strong>，最低收费<strong>500-1000元</strong>，封顶通常<strong>5万元</strong>。实际费率根据保险公司、案件风险、保全标的等因素确定。</p>
+
+<h2>三、重要提示</h2>
+<ol>
+<li><strong>诉讼费承担：</strong>由原告预交，最终由败诉方承担；部分胜诉部分败诉的，由法院决定分担比例。</li>
+<li><strong>律师费承担：</strong>原则上由聘请方自行承担，但特定案件（知识产权、合同违约等）可主张由败诉方承担。</li>
+<li><strong>保全保险费承担：</strong>由申请人预付，胜诉后可主张败诉方承担合理维权费用。</li>
+<li><strong>协商确定：</strong>实际律师收费可在政府指导价规定幅度内（±20%）协商确定；风险代理最高不超过标的额30%。</li>
+<li><strong>仅供参考：</strong>本计算结果仅供参考，具体费用以委托代理合同约定和实际发生为准。</li>
+</ol>
+
+<hr style="margin-top: 30px; border: none; border-top: 1px solid #e5e7eb;">
+<p align="center" style="font-size: 10pt; color: #9ca3af;">
+    Generated by 律师费诉讼费计算器 V1.0.0（立项星火版）<br>
+    作者：芭比娃娃的爸比 | https://github.com/asktai/AiLTK
+</p>
+</body>
+</html>
+            `;
+        }
+
+        // 初始化
+        window.onload = function() {
+            setInsuranceRate(0.002); // 默认千分之二
+            calculateAll();
+        };
+    </script>
+</body>
+</html>
