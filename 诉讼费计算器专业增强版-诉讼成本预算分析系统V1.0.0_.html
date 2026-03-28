@@ -3,11 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="诉讼费计算器专业增强版 - 企业诉讼费用成本预算分析系统，支持普通模式与专业模式">
-    <meta name="keywords" content="诉讼费计算器,律师费计算,诉讼成本,法务工具">
+    <meta name="description" content="诉讼费计算器专业增强版 - 企业诉讼费用成本预算分析系统，支持诉讼费、律师费、保全费、执行费等全功能计算">
+    <meta name="keywords" content="诉讼费计算器,律师费计算,诉讼成本,保全费,执行费,法务工具">
     <meta name="author" content="胡皓">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚖️</text></svg>">
+    <meta name="version" content="V1.0.0">
+    
+    <!-- 桌面快捷方式徽标支持 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%234f46e5' width='180' height='180' rx='40'/><text x='90' y='130' text-anchor='middle' font-size='120'>⚖️</text></svg>">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi6K665Z+z6L+c56i256e76KGT5a6e6aqk5a6kIiwic2hvcnRfbmFtZSI6IuS+oeaUueWQiCIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZmZmZmZmIiwidGhlbWVfY29sb3IiOiIjNGY0NmU1In0=">
+    
     <title>诉讼费计算器专业增强版 - 诉讼费用成本预算分析系统</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -18,7 +25,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
-        /* 自定义样式 */
+        /* 
+        =====================================================
+        版本：-V1.0.0_立项星火版（初始版本）
+        作者：胡皓
+        更新说明：
+        1. 全新开发第一个版本，实现双模式架构（普通/专业）
+        2. 严格按《诉讼费用交纳办法》（国务院令第481号）实现分段累计计算
+        3. 支持全案件类型（财产、执行、保全、支付令、破产、海事等）
+        4. 实现左侧可折叠面板、智能粘贴、虚拟键盘等企业级交互
+        5. 完整支持报告导出（TXT/MD/CSV/PNG/PDF）
+        历史版本：
+        - V1.0.0：立项星火版（初始版本）
+        =====================================================
+        */
+        
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
         
         body {
@@ -31,6 +52,40 @@
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .collapsible-section {
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .collapsible-section:hover {
+            border-left-color: #4f46e5;
+        }
+        
+        .collapsible-header {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+        
+        .collapsible-header:hover {
+            background: rgba(79, 70, 229, 0.05);
+        }
+        
+        .collapsible-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            opacity: 1;
+        }
+        
+        .collapsible-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+            padding: 0;
         }
         
         .number-font {
@@ -57,7 +112,7 @@
             z-index: 1000;
             cursor: move;
             user-select: none;
-            transition: transform 0.2s, opacity 0.2s;
+            transition: transform 0.2s, opacity 0.2s, width 0.3s, height 0.3s;
         }
         
         .virtual-keyboard.minimized {
@@ -68,6 +123,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 0;
         }
         
         .key-btn {
@@ -143,7 +199,6 @@
             background: #eff6ff;
         }
         
-        /* 密码保护遮罩 */
         .password-overlay {
             position: fixed;
             inset: 0;
@@ -155,7 +210,15 @@
             backdrop-filter: blur(10px);
         }
         
-        /* 滚动条美化 */
+        .toggle-icon {
+            transition: transform 0.3s;
+        }
+        
+        .toggle-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+        
+        /* 滚动条优化 */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -170,24 +233,58 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+        
+        select {
+            scroll-behavior: smooth;
+        }
+        
+        /* 智能粘贴提示 */
+        .paste-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s;
+        }
+        
+        .paste-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .warning-text {
+            color: #dc2626;
+            font-weight: 700;
+        }
+        
+        /* 专业模式标题风格 */
+        .pro-mode-title {
+            background: linear-gradient(135deg, #059669 0%, #0891b2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .pro-mode-subtitle {
+            color: #059669;
+        }
+        
+        .normal-mode-title {
+            background: linear-gradient(to right, #2563eb, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
     </style>
 </head>
 <body class="text-gray-800">
-
-    <!-- 
-    =====================================================
-    版本：V1.0.0_立项星火版（初始版本）
-    作者：胡皓
-    更新说明：
-    1. 全新开发第一个版本，实现双模式架构
-    2. 完整实现诉讼费计算引擎（严格按国务院令第481号）
-    3. 实现律师费四模式计算（固定/比例/计时/风险代理）
-    4. 增加附加费用、法务-律师协同、内部成本模块
-    5. 实现虚拟键盘、智能反算、方案对比、多格式导出
-    历史版本：
-    - V1.0.0：立项星火版（初始版本）
-    =====================================================
-    -->
 
     <!-- 密码保护层（专业模式） -->
     <div id="passwordOverlay" class="password-overlay hidden">
@@ -199,7 +296,8 @@
             </div>
             <div class="space-y-4">
                 <input type="password" id="accessPassword" placeholder="请输入密码" 
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-center text-lg tracking-widest">
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-center text-lg tracking-widest"
+                    onkeypress="if(event.key==='Enter')checkPassword()">
                 <button onclick="checkPassword()" 
                     class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
                     进入系统
@@ -213,17 +311,30 @@
         </div>
     </div>
 
+    <!-- 智能粘贴提示 -->
+    <div id="pasteToast" class="paste-toast">已智能识别并粘贴金额</div>
+
     <!-- 顶部导航 -->
     <nav class="bg-white shadow-lg sticky top-0 z-50 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center space-x-4">
                     <span class="text-2xl">⚖️</span>
-                    <div>
-                        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            诉讼费计算器专业增强版
-                        </h1>
-                        <p class="text-xs text-gray-500">诉讼费用成本预算分析系统</p>
+                    <div id="titleContainer">
+                        <!-- 普通模式标题 -->
+                        <div id="normalTitle" class="block">
+                            <h1 class="text-xl font-bold normal-mode-title">
+                                诉讼费计算器专业增强版
+                            </h1>
+                            <p class="text-xs text-gray-500">诉讼费用成本预算分析系统</p>
+                        </div>
+                        <!-- 专业模式标题（交换位置） -->
+                        <div id="proTitle" class="hidden">
+                            <h1 class="text-xl font-bold pro-mode-title">
+                                诉讼费用成本预算分析系统
+                            </h1>
+                            <p class="text-xs text-gray-500">诉讼费计算器专业增强版</p>
+                        </div>
                     </div>
                 </div>
                 
@@ -249,7 +360,7 @@
                         <a href="https://asktai.github.io/KSCTJ/" target="_blank" class="text-blue-600 hover:underline">其它项目</a>
                         <div class="relative group">
                             <button class="text-gray-600 hover:text-blue-600">预留链接</button>
-                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block">
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block border border-gray-200">
                                 <a href="#" onclick="alert('预留位置1')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">预留链接1</a>
                                 <a href="#" onclick="alert('预留位置2')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">预留链接2</a>
                                 <a href="#" onclick="alert('预留位置3')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">预留链接3</a>
@@ -262,11 +373,16 @@
             </div>
         </div>
         
-        <!-- 宣传栏 -->
-        <div class="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white text-center py-2 text-sm font-medium no-print">
+        <!-- 宣传栏 - 专业模式下改变颜色 -->
+        <div id="bannerNormal" class="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white text-center py-2 text-sm font-medium no-print">
             <span class="inline-block animate-pulse">💡</span>
             小法师胡皓 丰衣足食 努力自研 只为打造适合法务使用的专业法律计算器!
             <span class="inline-block animate-pulse">⚡</span>
+        </div>
+        <div id="bannerPro" class="hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white text-center py-2 text-sm font-medium no-print">
+            <span class="inline-block animate-pulse">📊</span>
+            小法师胡皓 丰衣足食 努力自研 只为打造适合法务使用的专业法律计算器!
+            <span class="inline-block animate-pulse">💼</span>
         </div>
     </nav>
 
@@ -291,19 +407,25 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             <!-- 左侧设置区 -->
-            <div class="lg:col-span-5 space-y-6 no-print">
+            <div class="lg:col-span-5 space-y-4 no-print">
                 
                 <!-- 基础信息 -->
-                <div class="glass-panel rounded-2xl p-6 shadow-lg">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">📋</span>
-                        基础信息
-                    </h3>
-                    <div class="space-y-4">
+                <div class="glass-panel rounded-2xl shadow-lg collapsible-section" id="section-basic">
+                    <div class="collapsible-header p-4 flex justify-between items-center" onclick="toggleSection('section-basic')">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">📋</span>
+                            基础信息
+                        </h3>
+                        <svg class="w-5 h-5 text-gray-500 toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div class="collapsible-content px-4 pb-4 space-y-4">
                         <div class="input-group">
                             <label class="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
                             <input type="text" id="projectName" placeholder="纠纷案" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                onpaste="smartPaste(event, this)">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="input-group">
@@ -321,13 +443,17 @@
                 </div>
 
                 <!-- 适用收费标准 -->
-                <div class="glass-panel rounded-2xl p-6 shadow-lg">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <span class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600">⚖️</span>
-                        适用收费标准
-                    </h3>
-                    
-                    <div class="space-y-4">
+                <div class="glass-panel rounded-2xl shadow-lg collapsible-section" id="section-standard">
+                    <div class="collapsible-header p-4 flex justify-between items-center" onclick="toggleSection('section-standard')">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <span class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600">⚖️</span>
+                            适用收费标准
+                        </h3>
+                        <svg class="w-5 h-5 text-gray-500 toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div class="collapsible-content px-4 pb-4 space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">地区选择</label>
                             <select id="regionSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateLawyerFeeStandard()">
@@ -398,6 +524,13 @@
                                 <option value="administrative">行政案件</option>
                                 <option value="ip-admin">商标、专利、海事行政案件</option>
                                 <option value="objection">案件管辖权异议</option>
+                                <option value="execution">申请执行</option>
+                                <option value="preservation">申请保全措施</option>
+                                <option value="payment-order">申请支付令</option>
+                                <option value="public-notice">申请公示催告</option>
+                                <option value="arbitration-revoke">申请撤销仲裁裁决</option>
+                                <option value="bankruptcy">破产案件</option>
+                                <option value="maritime">海事案件</option>
                             </select>
                         </div>
 
@@ -420,10 +553,11 @@
                                     反推模式
                                 </button>
                             </div>
-                            <input type="text" id="amountInput" placeholder="输入金额" 
+                            <input type="text" id="amountInput" placeholder="输入金额（支持智能粘贴）" 
                                 class="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 number-font text-lg"
                                 oninput="formatAmountInput(this); debounceCalculate()"
-                                onfocus="activeInput = this">
+                                onfocus="activeInput = this"
+                                onpaste="smartPaste(event, this)">
                             <div id="amountChinese" class="text-sm text-blue-700 mt-1 font-medium"></div>
                             
                             <!-- 反算输入（隐藏） -->
@@ -443,14 +577,18 @@
                     </div>
                 </div>
 
-                <!-- 律师费方案（普通模式基础，专业模式增强） -->
-                <div class="glass-panel rounded-2xl p-6 shadow-lg" id="lawyerFeeSection">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <span class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600">👔</span>
-                        外部律师费方案
-                    </h3>
-                    
-                    <div class="space-y-4">
+                <!-- 律师费方案（已改名） -->
+                <div class="glass-panel rounded-2xl shadow-lg collapsible-section" id="section-lawyer">
+                    <div class="collapsible-header p-4 flex justify-between items-center" onclick="toggleSection('section-lawyer')">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <span class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600">👔</span>
+                            律师费方案
+                        </h3>
+                        <svg class="w-5 h-5 text-gray-500 toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                    <div class="collapsible-content px-4 pb-4 space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">计费模式</label>
                             <select id="lawyerFeeMode" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="toggleLawyerFeeMode()">
@@ -534,16 +672,20 @@
                 </div>
 
                 <!-- 专业模式专属模块 -->
-                <div id="professionalModules" class="space-y-6 hidden">
+                <div id="professionalModules" class="space-y-4 hidden">
                     
                     <!-- 附加费用项目 -->
-                    <div class="glass-panel rounded-2xl p-6 shadow-lg border-l-4 border-orange-400">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <span class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600">💰</span>
-                            附加费用项目
-                        </h3>
-                        
-                        <div class="space-y-3">
+                    <div class="glass-panel rounded-2xl shadow-lg border-l-4 border-orange-400 collapsible-section" id="section-additional">
+                        <div class="collapsible-header p-4 flex justify-between items-center" onclick="toggleSection('section-additional')">
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                <span class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600">💰</span>
+                                附加费用项目
+                            </h3>
+                            <svg class="w-5 h-5 text-gray-500 toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                        <div class="collapsible-content px-4 pb-4 space-y-3">
                             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                 <div class="flex items-center gap-2">
                                     <input type="checkbox" id="enablePreservation" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
@@ -561,7 +703,8 @@
                                             <input type="number" id="insuranceRate" value="0.3" step="0.1" 
                                                 class="w-20 px-2 py-1 text-xs border border-gray-300 rounded"
                                                 oninput="calculateAll()">
-                                            <span class="text-xs text-gray-500">%</span>
+                                            <span class="text-xs text-gray-500">%（自动读取标的额）</span>
+                                            <button onclick="syncInsuranceAmount()" class="text-xs text-blue-600 hover:underline">同步标的额</button>
                                         </div>
                                     </div>
                                 </div>
@@ -608,13 +751,17 @@
                     </div>
 
                     <!-- 法务-律师协同 -->
-                    <div class="glass-panel rounded-2xl p-6 shadow-lg border-l-4 border-indigo-400">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <span class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">🤝</span>
-                            法务-律师协同
-                        </h3>
-                        
-                        <div class="space-y-3">
+                    <div class="glass-panel rounded-2xl shadow-lg border-l-4 border-indigo-400 collapsible-section" id="section-cooperation">
+                        <div class="collapsible-header p-4 flex justify-between items-center" onclick="toggleSection('section-cooperation')">
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                <span class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">🤝</span>
+                                法务-律师协同
+                            </h3>
+                            <svg class="w-5 h-5 text-gray-500 toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                        <div class="collapsible-content px-4 pb-4 space-y-3">
                             <select id="cooperationMode" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" onchange="updateCooperationMode()">
                                 <option value="0">律师代理（0%减免）</option>
                                 <option value="100">法务代理（100%减免）</option>
@@ -637,13 +784,17 @@
                     </div>
 
                     <!-- 内部团队成本 -->
-                    <div class="glass-panel rounded-2xl p-6 shadow-lg border-l-4 border-teal-400">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <span class="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center text-teal-600">👥</span>
-                            内部团队成本
-                        </h3>
-                        
-                        <div class="space-y-3">
+                    <div class="glass-panel rounded-2xl shadow-lg border-l-4 border-teal-400 collapsible-section" id="section-internal">
+                        <div class="collapsible-header p-4 flex justify-between items-center" onclick="toggleSection('section-internal')">
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                <span class="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center text-teal-600">👥</span>
+                                内部团队成本
+                            </h3>
+                            <svg class="w-5 h-5 text-gray-500 toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                        <div class="collapsible-content px-4 pb-4 space-y-3">
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">法务人员工时(小时)</label>
@@ -668,13 +819,17 @@
                     </div>
 
                     <!-- 胜诉概率模拟 -->
-                    <div class="glass-panel rounded-2xl p-6 shadow-lg border-l-4 border-pink-400">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <span class="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center text-pink-600">🎯</span>
-                            胜诉概率模拟
-                        </h3>
-                        
-                        <div class="space-y-4">
+                    <div class="glass-panel rounded-2xl shadow-lg border-l-4 border-pink-400 collapsible-section" id="section-probability">
+                        <div class="collapsible-header p-4 flex justify-between items-center" onclick="toggleSection('section-probability')">
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                <span class="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center text-pink-600">🎯</span>
+                                胜诉概率模拟
+                            </h3>
+                            <svg class="w-5 h-5 text-gray-500 toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                        <div class="collapsible-content px-4 pb-4 space-y-4">
                             <div>
                                 <div class="flex justify-between mb-1">
                                     <label class="text-sm font-medium text-gray-700">预估胜诉概率</label>
@@ -699,13 +854,14 @@
                             <div class="p-3 bg-gray-100 rounded-lg">
                                 <div class="text-sm text-gray-600">诉讼成本占标的比例</div>
                                 <div id="costRatio" class="text-xl font-bold text-gray-800">0%</div>
+                                <div id="costWarning" class="text-xs text-red-600 mt-1 hidden">⚠️ 成本占比过高，建议评估诉讼必要性</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 操作按钮 -->
-                <div class="flex flex-wrap gap-3">
+                <div class="flex flex-wrap gap-3 no-print">
                     <button onclick="saveScheme()" class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-lg hover:shadow-xl">
                         💾 保存当前方案
                     </button>
@@ -715,12 +871,17 @@
                 </div>
 
                 <!-- 历史记录 -->
-                <div class="glass-panel rounded-2xl p-6 shadow-lg">
-                    <div class="flex justify-between items-center mb-4">
+                <div class="glass-panel rounded-2xl p-6 shadow-lg collapsible-section" id="section-history">
+                    <div class="collapsible-header flex justify-between items-center mb-2" onclick="toggleSection('section-history')">
                         <h3 class="text-lg font-bold text-gray-800">历史记录</h3>
-                        <button onclick="clearHistory()" class="text-xs text-red-600 hover:text-red-800">清空全部</button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="clearHistory()" class="text-xs text-red-600 hover:text-red-800" onclick="event.stopPropagation()">清空全部</button>
+                            <svg class="w-5 h-5 text-gray-500 toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
                     </div>
-                    <div id="historyList" class="space-y-2 max-h-64 overflow-y-auto">
+                    <div class="collapsible-content space-y-2 max-h-64 overflow-y-auto" id="historyList">
                         <p class="text-sm text-gray-500 text-center py-4">暂无历史记录</p>
                     </div>
                 </div>
@@ -796,14 +957,14 @@
 
                     <!-- 合规提醒 -->
                     <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <h4 class="font-bold text-yellow-800 mb-2 flex items-center gap-2">
+                        <h4 class="font-bold warning-text mb-2 flex items-center gap-2 text-lg">
                             <span>⚠️</span> 风险提示与免责声明
                         </h4>
-                        <ul class="text-xs text-yellow-700 space-y-1 list-disc list-inside">
+                        <ul class="text-xs space-y-1 list-disc list-inside">
                             <li>诉讼费计算依据《诉讼费用交纳办法》（国务院令第481号），简易程序及调解结案可减半收取</li>
                             <li>风险代理收费不得高于争议标的额的30%（《律师服务收费管理办法》第13条）</li>
                             <li>保全保险费通常为保全金额的0.3%-1%，具体费率视保险公司及担保金额而定</li>
-                            <li class="font-bold text-red-600 text-sm">本计算结果仅供参考，实际费用以法院、律所、保险公司等机构实际收取为准</li>
+                            <li class="warning-text text-sm">本计算结果仅供参考，实际费用以法院、律所、保险公司等机构实际收取为准</li>
                         </ul>
                     </div>
                 </div>
@@ -876,14 +1037,14 @@
 
     <!-- 虚拟键盘 -->
     <div id="virtualKeyboard" class="virtual-keyboard hidden no-print">
-        <div class="flex justify-between items-center mb-3 text-white">
+        <div class="flex justify-between items-center mb-3 text-white keyboard-header">
             <span class="text-sm font-medium cursor-move">🧮 数字键盘</span>
             <div class="flex gap-2">
                 <button onclick="minimizeKeyboard()" class="text-gray-400 hover:text-white">−</button>
                 <button onclick="toggleCalculator()" class="text-gray-400 hover:text-white">×</button>
             </div>
         </div>
-        <div class="grid grid-cols-4 gap-2">
+        <div class="keyboard-content grid grid-cols-4 gap-2">
             <button onclick="inputKey('7')" class="key-btn">7</button>
             <button onclick="inputKey('8')" class="key-btn">8</button>
             <button onclick="inputKey('9')" class="key-btn">9</button>
@@ -912,7 +1073,8 @@
     <!-- 页脚 -->
     <footer class="bg-gray-800 text-gray-400 py-8 mt-12 no-print">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="mb-2">诉讼费计算器专业增强版 © 2024 | 中智药业集团</p>
+            <p class="mb-2" id="footerTextNormal">诉讼费计算器专业增强版 © 2026 | 中智药业集团</p>
+            <p class="mb-2 hidden" id="footerTextPro">诉讼费用成本预算分析系统 © 2026 | 中智药业集团</p>
             <p class="text-sm">
                 <span class="inline-block mx-2">作者：胡皓</span>
                 <a href="https://github.com/asktai/AiLTK" target="_blank" class="text-blue-400 hover:underline mx-2">GitHub</a>
@@ -926,7 +1088,7 @@
 
     <script>
         // ==================== 全局状态 ====================
-        let currentMode = 'normal'; // 'normal' 或 'professional'
+        let currentMode = 'normal';
         let activeInput = null;
         let schemes = [];
         let costChart = null;
@@ -947,34 +1109,45 @@
             { limit: Infinity, rate: 0.005, fixed: 0 }
         ];
 
+        // 执行申请费标准（国务院令第481号第十四条）
+        const executionFeeTiers = [
+            { limit: 0, rate: 0, fixed: 50 },
+            { limit: 10000, rate: 0, fixed: 50 },
+            { limit: 500000, rate: 0.015, fixed: 0 },
+            { limit: 5000000, rate: 0.01, fixed: 0 },
+            { limit: 10000000, rate: 0.005, fixed: 0 },
+            { limit: Infinity, rate: 0.001, fixed: 0 }
+        ];
+
+        // 保全申请费标准（国务院令第481号第十四条）
+        const preservationFeeTiers = [
+            { limit: 1000, rate: 0, fixed: 30 },
+            { limit: 100000, rate: 0.01, fixed: 0 },
+            { limit: Infinity, rate: 0.005, fixed: 0, max: 5000 }
+        ];
+
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
             initCharts();
             loadHistory();
             updateLawyerFeeStandard();
-            
-            // 键盘拖拽功能
+            initKeyboardDrag();
+            initSectionStates();
+        });
+
+        function initKeyboardDrag() {
             const keyboard = document.getElementById('virtualKeyboard');
             let isDragging = false;
-            let currentX;
-            let currentY;
-            let initialX;
-            let initialY;
-            let xOffset = 0;
-            let yOffset = 0;
+            let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
 
-            keyboard.addEventListener('mousedown', dragStart);
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', dragEnd);
-
-            function dragStart(e) {
-                if (e.target.tagName === 'BUTTON') return;
+            keyboard.addEventListener('mousedown', function(e) {
+                if (e.target.closest('.key-btn')) return;
                 initialX = e.clientX - xOffset;
                 initialY = e.clientY - yOffset;
                 isDragging = true;
-            }
+            });
 
-            function drag(e) {
+            document.addEventListener('mousemove', function(e) {
                 if (isDragging) {
                     e.preventDefault();
                     currentX = e.clientX - initialX;
@@ -983,14 +1156,46 @@
                     yOffset = currentY;
                     keyboard.style.transform = `translate(${currentX}px, ${currentY}px)`;
                 }
-            }
+            });
 
-            function dragEnd() {
-                initialX = currentX;
-                initialY = currentY;
+            document.addEventListener('mouseup', function() {
                 isDragging = false;
-            }
-        });
+            });
+        }
+
+        function initSectionStates() {
+            const sections = [
+                'section-basic', 
+                'section-standard', 
+                'section-lawyer', 
+                'section-additional', 
+                'section-cooperation', 
+                'section-internal', 
+                'section-probability'
+            ];
+            
+            sections.forEach((id, index) => {
+                const section = document.getElementById(id);
+                if (section && index > 1) {
+                    const content = section.querySelector('.collapsible-content');
+                    const icon = section.querySelector('.toggle-icon');
+                    if (content && icon) {
+                        content.classList.add('collapsed');
+                        icon.classList.add('collapsed');
+                    }
+                }
+            });
+        }
+
+        // ==================== 折叠面板控制 ====================
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const content = section.querySelector('.collapsible-content');
+            const icon = section.querySelector('.toggle-icon');
+            
+            content.classList.toggle('collapsed');
+            icon.classList.toggle('collapsed');
+        }
 
         // ==================== 模式切换 ====================
         function setMode(mode) {
@@ -1002,16 +1207,7 @@
             }
             
             currentMode = 'normal';
-            document.getElementById('btnNormal').classList.add('bg-white', 'shadow', 'text-blue-600');
-            document.getElementById('btnNormal').classList.remove('text-gray-600');
-            document.getElementById('btnPro').classList.remove('bg-white', 'shadow', 'text-blue-600');
-            document.getElementById('btnPro').classList.add('text-gray-600');
-            
-            document.getElementById('professionalModules').classList.add('hidden');
-            document.getElementById('additionalFeeRow').style.display = 'flex';
-            document.getElementById('internalCostRow').style.display = 'none';
-            
-            calculateAll();
+            updateModeUI();
         }
 
         function checkPassword() {
@@ -1032,80 +1228,85 @@
 
         function activateProfessionalMode() {
             currentMode = 'professional';
-            document.getElementById('btnPro').classList.add('bg-white', 'shadow', 'text-blue-600');
-            document.getElementById('btnPro').classList.remove('text-gray-600');
-            document.getElementById('btnNormal').classList.remove('bg-white', 'shadow', 'text-blue-600');
-            document.getElementById('btnNormal').classList.add('text-gray-600');
+            updateModeUI();
+        }
+
+        function updateModeUI() {
+            const isPro = currentMode === 'professional';
             
-            document.getElementById('professionalModules').classList.remove('hidden');
-            document.getElementById('additionalFeeRow').style.display = 'none';
-            document.getElementById('internalCostRow').style.display = 'flex';
+            // 更新按钮样式
+            document.getElementById('btnNormal').className = isPro ? 
+                'px-4 py-2 rounded-md text-sm font-medium transition-all text-gray-600 hover:text-gray-800' :
+                'px-4 py-2 rounded-md text-sm font-medium transition-all bg-white shadow text-blue-600';
             
+            document.getElementById('btnPro').className = isPro ? 
+                'px-4 py-2 rounded-md text-sm font-medium transition-all bg-white shadow text-emerald-600' :
+                'px-4 py-2 rounded-md text-sm font-medium transition-all text-gray-600 hover:text-gray-800';
+            
+            // 交换标题显示
+            document.getElementById('normalTitle').classList.toggle('hidden', isPro);
+            document.getElementById('proTitle').classList.toggle('hidden', !isPro);
+            
+            // 交换宣传栏颜色和图标
+            document.getElementById('bannerNormal').classList.toggle('hidden', isPro);
+            document.getElementById('bannerPro').classList.toggle('hidden', !isPro);
+            
+            // 交换页脚文字
+            document.getElementById('footerTextNormal').classList.toggle('hidden', isPro);
+            document.getElementById('footerTextPro').classList.toggle('hidden', !isPro);
+            
+            // 专业模块显示控制
+            document.getElementById('professionalModules').classList.toggle('hidden', !isPro);
+            document.getElementById('additionalFeeRow').style.display = isPro ? 'none' : 'flex';
+            document.getElementById('internalCostRow').style.display = isPro ? 'flex' : 'none';
+            
+            calculateAll();
+        }
+
+        // ==================== 智能粘贴功能 ====================
+        function smartPaste(event, input) {
+            event.preventDefault();
+            const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+            
+            let amount = extractAmount(pastedText);
+            
+            if (amount > 0) {
+                input.value = amount.toLocaleString('zh-CN');
+                formatAmountInput(input);
+                calculateAll();
+                showPasteToast();
+            } else {
+                input.value = pastedText;
+            }
+        }
+
+        function extractAmount(text) {
+            if (!text) return 0;
+            
+            let cleaned = text.replace(/[¥,，\s]/g, '');
+            
+            const match = cleaned.match(/(\d+\.?\d*)/);
+            if (match) {
+                return parseFloat(match[0]);
+            }
+            
+            return 0;
+        }
+
+        function showPasteToast() {
+            const toast = document.getElementById('pasteToast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function syncInsuranceAmount() {
+            const amount = parseFloat(document.getElementById('amountInput').value.replace(/,/g, '')) || 0;
+            document.getElementById('insuranceRate').value = '0.3';
             calculateAll();
         }
 
         // ==================== 计算引擎 ====================
         
-        // 计算诉讼费（严格按国务院令第481号）
-        function calculateCourtFee(amount, caseType, stage) {
-            if (!amount || amount <= 0) return 0;
-            
-            let fee = 0;
-            
-            switch(caseType) {
-                case 'property':
-                    fee = calculatePropertyCaseFee(amount);
-                    break;
-                case 'non-property':
-                    fee = 50 + Math.random() * 50; // 50-100元
-                    break;
-                case 'divorce':
-                    fee = amount > 200000 ? 300 + (amount - 200000) * 0.005 : (50 + Math.random() * 250);
-                    break;
-                case 'personality':
-                    if (amount <= 50000) fee = 100 + Math.random() * 400;
-                    else if (amount <= 100000) fee = 100 + (amount - 50000) * 0.01;
-                    else fee = 100 + 50000 * 0.01 + (amount - 100000) * 0.005;
-                    break;
-                case 'ip':
-                    fee = amount > 0 ? calculatePropertyCaseFee(amount) : (500 + Math.random() * 500);
-                    break;
-                case 'labor':
-                    fee = 10;
-                    break;
-                case 'administrative':
-                    fee = 50;
-                    break;
-                case 'ip-admin':
-                    fee = 100;
-                    break;
-                case 'objection':
-                    fee = 50 + Math.random() * 50;
-                    break;
-                default:
-                    fee = calculatePropertyCaseFee(amount);
-            }
-            
-            // 阶段倍数
-            const stageMultipliers = {
-                'first': 1,
-                'second': 1,
-                'first-second': 2,
-                'first-second-exec': 2.5,
-                'execution': 0.5,
-                'arbitration': 1
-            };
-            
-            fee *= (stageMultipliers[stage] || 1);
-            
-            // 简易程序减半
-            if (document.getElementById('simpleProcedure').checked) {
-                fee *= 0.5;
-            }
-            
-            return Math.round(fee);
-        }
-
         function calculatePropertyCaseFee(amount) {
             let fee = 0;
             let remaining = amount;
@@ -1124,7 +1325,189 @@
             return fee;
         }
 
-        // 计算律师费
+        function calculateExecutionFee(amount) {
+            if (!amount || amount <= 0) return 50;
+            
+            let fee = 0;
+            let prevLimit = 0;
+            
+            for (let tier of executionFeeTiers) {
+                if (amount > tier.limit) {
+                    fee += (tier.limit - prevLimit) * tier.rate + (prevLimit === 0 ? tier.fixed : 0);
+                    prevLimit = tier.limit;
+                } else {
+                    fee += (amount - prevLimit) * tier.rate + (prevLimit === 0 ? tier.fixed : 0);
+                    break;
+                }
+            }
+            
+            return fee;
+        }
+
+        function calculatePreservationFee(amount) {
+            if (!amount || amount <= 1000) return 30;
+            
+            let fee = 0;
+            let prevLimit = 1000;
+            
+            if (amount > 1000) {
+                const tier1Amount = Math.min(amount, 100000) - 1000;
+                fee += tier1Amount * 0.01;
+            }
+            
+            if (amount > 100000) {
+                const tier2Amount = amount - 100000;
+                fee += tier2Amount * 0.005;
+            }
+            
+            fee += 30;
+            
+            return Math.min(Math.round(fee), 5000);
+        }
+
+        function calculateAll() {
+            const amount = parseFloat(document.getElementById('amountInput').value.replace(/,/g, '')) || 0;
+            const caseType = document.getElementById('caseType').value;
+            const stage = document.getElementById('litigationStage').value;
+            
+            let courtFee = 0;
+            
+            switch(caseType) {
+                case 'property':
+                    courtFee = calculatePropertyCaseFee(amount);
+                    const stageMultipliers = {
+                        'first': 1, 'second': 1, 'first-second': 2,
+                        'first-second-exec': 2.5, 'execution': 0.5, 'arbitration': 1
+                    };
+                    courtFee *= (stageMultipliers[stage] || 1);
+                    break;
+                    
+                case 'non-property':
+                    courtFee = 50 + (amount > 0 ? Math.min(amount * 0.01, 50) : 0);
+                    break;
+                    
+                case 'divorce':
+                    courtFee = amount > 200000 ? 300 + (amount - 200000) * 0.005 : 50 + Math.floor(Math.random() * 250);
+                    break;
+                    
+                case 'personality':
+                    if (amount <= 50000) courtFee = 100 + Math.floor(Math.random() * 400);
+                    else if (amount <= 100000) courtFee = 100 + (amount - 50000) * 0.01;
+                    else courtFee = 100 + 50000 * 0.01 + (amount - 100000) * 0.005;
+                    break;
+                    
+                case 'ip':
+                    courtFee = amount > 0 ? calculatePropertyCaseFee(amount) : 600;
+                    break;
+                    
+                case 'labor':
+                    courtFee = 10;
+                    break;
+                    
+                case 'administrative':
+                    courtFee = 50;
+                    break;
+                    
+                case 'ip-admin':
+                    courtFee = 100;
+                    break;
+                    
+                case 'objection':
+                    courtFee = 50 + Math.floor(Math.random() * 50);
+                    break;
+                    
+                case 'execution':
+                    courtFee = calculateExecutionFee(amount);
+                    break;
+                    
+                case 'preservation':
+                    courtFee = calculatePreservationFee(amount);
+                    break;
+                    
+                case 'payment-order':
+                    courtFee = calculatePropertyCaseFee(amount) / 3;
+                    break;
+                    
+                case 'public-notice':
+                    courtFee = 100;
+                    break;
+                    
+                case 'arbitration-revoke':
+                    courtFee = 400;
+                    break;
+                    
+                case 'bankruptcy':
+                    const baseFee = calculatePropertyCaseFee(amount);
+                    courtFee = Math.min(baseFee / 2, 300000);
+                    break;
+                    
+                case 'maritime':
+                    courtFee = 1000;
+                    break;
+            }
+            
+            if (document.getElementById('simpleProcedure').checked && caseType === 'property') {
+                courtFee *= 0.5;
+            }
+            
+            courtFee = Math.round(courtFee);
+            
+            const lawyerFee = calculateLawyerFee(amount);
+            
+            const preservationFee = document.getElementById('enablePreservation').checked ? 
+                calculatePreservationFee(amount) : 0;
+            const insuranceFee = document.getElementById('enableInsurance').checked ? 
+                Math.round(amount * (parseFloat(document.getElementById('insuranceRate').value) || 0) / 100) : 0;
+            const travelFee = parseFloat(document.getElementById('travelFee').value) || 0;
+            const announcementFee = parseFloat(document.getElementById('announcementFee').value) || 0;
+            const evaluationFee = parseFloat(document.getElementById('evaluationFee').value) || 0;
+            const investigationFee = parseFloat(document.getElementById('investigationFee').value) || 0;
+            const otherFee = parseFloat(document.getElementById('otherFee').value) || 0;
+            
+            const additionalTotal = preservationFee + insuranceFee + travelFee + announcementFee + 
+                evaluationFee + investigationFee + otherFee;
+            
+            const internalCost = calculateInternalCost();
+            
+            let cooperationSaving = 0;
+            if (currentMode === 'professional') {
+                const coopMode = document.getElementById('cooperationMode').value;
+                let reductionRate = 0;
+                if (coopMode === 'custom') {
+                    reductionRate = (parseFloat(document.getElementById('customCooperationRate').value) || 0) / 100;
+                } else {
+                    reductionRate = parseFloat(coopMode) / 100;
+                }
+                cooperationSaving = Math.round(lawyerFee * reductionRate);
+            }
+            
+            const finalLawyerFee = lawyerFee - cooperationSaving;
+            
+            const total = courtFee + finalLawyerFee + additionalTotal + internalCost;
+            
+            updateDisplay({
+                amount, courtFee, lawyerFee: finalLawyerFee, originalLawyerFee: lawyerFee,
+                additionalTotal, internalCost, cooperationSaving, total,
+                preservationFee, insuranceFee, travelFee, announcementFee, evaluationFee, investigationFee, otherFee
+            });
+            
+            updateCharts({
+                courtFee, lawyerFee: finalLawyerFee, additional: additionalTotal, internal: internalCost
+            });
+            
+            updateDetailTable({
+                courtFee, lawyerFee: finalLawyerFee, preservationFee, insuranceFee, travelFee,
+                announcementFee, evaluationFee, investigationFee, otherFee, internalCost, cooperationSaving, total
+            });
+            
+            updateProbabilitySimulation(amount, total);
+            
+            document.getElementById('amountChinese').textContent = amount > 0 ? '大写：' + numberToChinese(amount) : '';
+            document.getElementById('totalCostChinese').textContent = total > 0 ? numberToChinese(total) : '';
+            
+            return { amount, courtFee, lawyerFee: finalLawyerFee, additionalTotal, internalCost, total };
+        }
+
         function calculateLawyerFee(amount) {
             const mode = document.getElementById('lawyerFeeMode').value;
             let fee = 0;
@@ -1157,24 +1540,6 @@
             return Math.round(fee);
         }
 
-        // 计算保全费
-        function calculatePreservationFee(amount) {
-            if (!document.getElementById('enablePreservation').checked) return 0;
-            
-            if (amount <= 1000) return 30;
-            if (amount <= 100000) return 30 + (amount - 1000) * 0.01;
-            let fee = 30 + 99000 * 0.01 + (amount - 100000) * 0.005;
-            return Math.min(Math.round(fee), 5000);
-        }
-
-        // 计算保全保险费
-        function calculateInsuranceFee(amount) {
-            if (!document.getElementById('enableInsurance').checked) return 0;
-            const rate = (parseFloat(document.getElementById('insuranceRate').value) || 0) / 100;
-            return Math.round(amount * rate);
-        }
-
-        // 计算内部团队成本
         function calculateInternalCost() {
             if (currentMode !== 'professional') return 0;
             
@@ -1183,94 +1548,6 @@
             const management = parseFloat(document.getElementById('managementCost').value) || 0;
             
             return (hours * hourCost) + management;
-        }
-
-        // 主计算函数
-        function calculateAll() {
-            const amount = parseFloat(document.getElementById('amountInput').value.replace(/,/g, '')) || 0;
-            const caseType = document.getElementById('caseType').value;
-            const stage = document.getElementById('litigationStage').value;
-            
-            // 基础费用
-            const courtFee = calculateCourtFee(amount, caseType, stage);
-            const lawyerFee = calculateLawyerFee(amount);
-            
-            // 附加费用
-            const preservationFee = calculatePreservationFee(amount);
-            const insuranceFee = calculateInsuranceFee(amount);
-            const travelFee = parseFloat(document.getElementById('travelFee').value) || 0;
-            const announcementFee = parseFloat(document.getElementById('announcementFee').value) || 0;
-            const evaluationFee = parseFloat(document.getElementById('evaluationFee').value) || 0;
-            const investigationFee = parseFloat(document.getElementById('investigationFee').value) || 0;
-            const otherFee = parseFloat(document.getElementById('otherFee').value) || 0;
-            
-            const additionalTotal = preservationFee + insuranceFee + travelFee + announcementFee + evaluationFee + investigationFee + otherFee;
-            
-            // 内部成本
-            const internalCost = calculateInternalCost();
-            
-            // 协同减免
-            let cooperationSaving = 0;
-            if (currentMode === 'professional') {
-                const coopMode = document.getElementById('cooperationMode').value;
-                let reductionRate = 0;
-                if (coopMode === 'custom') {
-                    reductionRate = (parseFloat(document.getElementById('customCooperationRate').value) || 0) / 100;
-                } else {
-                    reductionRate = parseFloat(coopMode) / 100;
-                }
-                cooperationSaving = Math.round(lawyerFee * reductionRate);
-            }
-            
-            const finalLawyerFee = lawyerFee - cooperationSaving;
-            
-            // 总费用
-            const total = courtFee + finalLawyerFee + additionalTotal + internalCost;
-            
-            // 更新显示
-            updateDisplay({
-                amount,
-                courtFee,
-                lawyerFee: finalLawyerFee,
-                originalLawyerFee: lawyerFee,
-                additionalTotal,
-                internalCost,
-                cooperationSaving,
-                total
-            });
-            
-            // 更新图表
-            updateCharts({
-                courtFee,
-                lawyerFee: finalLawyerFee,
-                additional: additionalTotal,
-                internal: internalCost
-            });
-            
-            // 更新明细表
-            updateDetailTable({
-                courtFee,
-                lawyerFee: finalLawyerFee,
-                preservationFee,
-                insuranceFee,
-                travelFee,
-                announcementFee,
-                evaluationFee,
-                investigationFee,
-                otherFee,
-                internalCost,
-                cooperationSaving,
-                total
-            });
-            
-            // 更新概率模拟
-            updateProbabilitySimulation(amount, total);
-            
-            // 更新金额大写
-            document.getElementById('amountChinese').textContent = amount > 0 ? '大写：' + numberToChinese(amount) : '';
-            document.getElementById('totalCostChinese').textContent = total > 0 ? numberToChinese(total) : '';
-            
-            return { amount, courtFee, lawyerFee: finalLawyerFee, additionalTotal, internalCost, total };
         }
 
         function updateDisplay(data) {
@@ -1282,8 +1559,8 @@
             
             if (currentMode === 'professional') {
                 document.getElementById('cooperationSaving').textContent = '¥' + formatMoney(data.cooperationSaving);
-                document.getElementById('preservationFeeDisplay').textContent = '¥' + formatMoney(calculatePreservationFee(data.amount));
-                document.getElementById('insuranceFeeDisplay').textContent = '¥' + formatMoney(calculateInsuranceFee(data.amount));
+                document.getElementById('preservationFeeDisplay').textContent = '¥' + formatMoney(data.preservationFee);
+                document.getElementById('insuranceFeeDisplay').textContent = '¥' + formatMoney(data.insuranceFee);
             }
             
             document.getElementById('tableTotal').textContent = '¥' + formatMoney(data.total);
@@ -1295,22 +1572,23 @@
             
             const items = [
                 { name: '法院诉讼费', value: data.courtFee, basis: '《诉讼费用交纳办法》' },
-                { name: '律师代理费', value: data.lawyerFee, basis: data.cooperationSaving > 0 ? `已减免 ¥${formatMoney(data.cooperationSaving)}` : '委托代理合同' },
-                { name: '法院保全费', value: data.preservationFee, basis: '实际保全金额', indent: true },
-                { name: '保全保险费', value: data.insuranceFee, basis: '保险公司费率', indent: true },
-                { name: '差旅费', value: data.travelFee, basis: '实际发生', indent: true },
-                { name: '公告费', value: data.announcementFee, basis: '实际发生', indent: true },
-                { name: '评估/鉴定费', value: data.evaluationFee, basis: '实际发生', indent: true },
-                { name: '调查取证费', value: data.investigationFee, basis: '实际发生', indent: true },
-                { name: '其它费用', value: data.otherFee, basis: '实际发生', indent: true },
-                { name: '内部团队成本', value: data.internalCost, basis: '工时×费率+管理费' }
+                { name: '律师代理费', value: data.lawyerFee, basis: data.cooperationSaving > 0 ? `已减免 ¥${formatMoney(data.cooperationSaving)}` : '委托代理合同', important: true },
+                { name: '法院保全费', value: data.preservationFee, basis: '实际保全金额', indent: true, skipIfZero: true },
+                { name: '保全保险费', value: data.insuranceFee, basis: '保险公司费率', indent: true, skipIfZero: true },
+                { name: '差旅费', value: data.travelFee, basis: '实际发生', indent: true, skipIfZero: true },
+                { name: '公告费', value: data.announcementFee, basis: '实际发生', indent: true, skipIfZero: true },
+                { name: '评估/鉴定费', value: data.evaluationFee, basis: '实际发生', indent: true, skipIfZero: true },
+                { name: '调查取证费', value: data.investigationFee, basis: '实际发生', indent: true, skipIfZero: true },
+                { name: '其它费用', value: data.otherFee, basis: '实际发生', indent: true, skipIfZero: true },
+                { name: '内部团队成本', value: data.internalCost, basis: '工时×费率+管理费', skipIfZero: true }
             ];
             
             items.forEach(item => {
+                if (item.skipIfZero && item.value === 0) return;
                 if (item.value === 0 && item.indent) return;
                 
                 const row = document.createElement('tr');
-                row.className = item.indent ? 'bg-gray-50' : '';
+                row.className = item.indent ? 'bg-gray-50' : (item.important ? 'bg-purple-50' : '');
                 const percentage = data.total > 0 ? ((item.value / data.total) * 100).toFixed(1) + '%' : '0%';
                 
                 row.innerHTML = `
@@ -1355,7 +1633,6 @@
             });
         }
 
-        // ==================== 概率模拟 ====================
         function updateProbabilitySimulation(amount, totalCost) {
             if (currentMode !== 'professional') return;
             
@@ -1369,13 +1646,13 @@
             const ratio = amount > 0 ? ((totalCost / amount) * 100).toFixed(2) : 0;
             document.getElementById('costRatio').textContent = ratio + '%';
             
-            // 预警
+            const warningEl = document.getElementById('costWarning');
             if (ratio > 30) {
+                warningEl.classList.remove('hidden');
                 document.getElementById('costRatio').classList.add('text-red-600');
-                document.getElementById('costRatio').classList.remove('text-gray-800');
             } else {
+                warningEl.classList.add('hidden');
                 document.getElementById('costRatio').classList.remove('text-red-600');
-                document.getElementById('costRatio').classList.add('text-gray-800');
             }
         }
 
@@ -1383,14 +1660,10 @@
             document.getElementById('winRateDisplay').textContent = document.getElementById('winRate').value + '%';
         }
 
-        // ==================== 辅助功能 ====================
-        
-        // 金额格式化
         function formatMoney(num) {
             return num.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
         }
 
-        // 数字转大写
         function numberToChinese(num) {
             const units = ['', '拾', '佰', '仟'];
             const bigUnits = ['', '万', '亿', '兆'];
@@ -1402,7 +1675,6 @@
             let integerPart = Math.floor(num);
             let decimalPart = Math.round((num - integerPart) * 100);
             
-            // 处理整数部分
             let intStr = '';
             let unitIndex = 0;
             while (integerPart > 0) {
@@ -1431,7 +1703,6 @@
             
             str = intStr + '元';
             
-            // 处理小数部分
             if (decimalPart === 0) {
                 str += '整';
             } else {
@@ -1444,7 +1715,6 @@
             return str;
         }
 
-        // 输入框格式化
         function formatAmountInput(input) {
             let value = input.value.replace(/,/g, '').replace(/[^\d.]/g, '');
             if (value) {
@@ -1454,14 +1724,12 @@
             }
         }
 
-        // 防抖计算
         let debounceTimer;
         function debounceCalculate() {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(calculateAll, 300);
         }
 
-        // 快速设置
         function quickSet(amount) {
             document.getElementById('caseType').value = 'property';
             const input = document.getElementById('amountInput');
@@ -1477,17 +1745,13 @@
 
         function handleCaseTypeChange() {
             const type = document.getElementById('caseType').value;
-            const amountInput = document.getElementById('amountInput');
-            
             if (type === 'labor') {
-                amountInput.value = '0';
+                document.getElementById('amountInput').value = '0';
                 document.getElementById('amountChinese').textContent = '';
             }
-            
             calculateAll();
         }
 
-        // 反算功能
         function toggleReverseCalc() {
             const section = document.getElementById('reverseCalcSection');
             section.classList.toggle('hidden');
@@ -1495,25 +1759,21 @@
 
         function calculateReverseAmount() {
             const fee = parseFloat(document.getElementById('reverseAmount').value) || 0;
-            // 简化的反算逻辑（实际应反向求解方程）
             let estimated = 0;
+            
             if (fee <= 50) estimated = fee * 200;
-            else {
-                estimated = (fee - 50) / 0.025 + 10000;
-            }
+            else if (fee <= 300) estimated = (fee - 50) / 0.025 + 10000;
+            else estimated = (fee - 300) / 0.02 + 100000;
             
             document.getElementById('reverseResult').textContent = 
                 '估算标的额约：¥' + formatMoney(estimated);
         }
 
-        // 律师费模式切换
         function toggleLawyerFeeMode() {
             const mode = document.getElementById('lawyerFeeMode').value;
-            document.getElementById('fixedMode').classList.add('hidden');
-            document.getElementById('ratioMode').classList.add('hidden');
-            document.getElementById('hourlyMode').classList.add('hidden');
-            document.getElementById('riskMode').classList.add('hidden');
-            
+            ['fixedMode', 'ratioMode', 'hourlyMode', 'riskMode'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
             document.getElementById(mode + 'Mode').classList.remove('hidden');
             calculateAll();
         }
@@ -1532,12 +1792,11 @@
 
         function updateCooperationMode() {
             const mode = document.getElementById('cooperationMode').value;
-            const customDiv = document.getElementById('customCooperationDiv');
-            if (mode === 'custom') {
-                customDiv.classList.remove('hidden');
-            } else {
-                customDiv.classList.add('hidden');
-            }
+            document.getElementById('customCooperationDiv').classList.toggle('hidden', mode !== 'custom');
+            calculateAll();
+        }
+
+        function updateLawyerFeeStandard() {
             calculateAll();
         }
 
@@ -1596,10 +1855,7 @@
                 container.appendChild(card);
             });
             
-            // 更新对比图表
-            if (schemes.length > 1) {
-                updateCompareChart();
-            }
+            if (schemes.length > 1) updateCompareChart();
         }
 
         function loadScheme(index) {
@@ -1615,9 +1871,7 @@
         function deleteScheme(index) {
             schemes.splice(index, 1);
             renderSchemes();
-            if (schemes.length === 0) {
-                document.getElementById('schemeCompareSection').style.display = 'none';
-            }
+            if (schemes.length === 0) document.getElementById('schemeCompareSection').style.display = 'none';
         }
 
         function clearAllSchemes() {
@@ -1629,39 +1883,22 @@
         function updateCompareChart() {
             const ctx = document.getElementById('compareChart').getContext('2d');
             
-            if (compareChart) {
-                compareChart.destroy();
-            }
+            if (compareChart) compareChart.destroy();
             
             compareChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: schemes.map(s => s.name),
                     datasets: [
-                        {
-                            label: '法院诉讼费',
-                            data: schemes.map(s => s.data.courtFee),
-                            backgroundColor: '#3b82f6'
-                        },
-                        {
-                            label: '律师代理费',
-                            data: schemes.map(s => s.data.lawyerFee),
-                            backgroundColor: '#9333ea'
-                        },
-                        {
-                            label: '附加费用',
-                            data: schemes.map(s => s.data.additionalTotal),
-                            backgroundColor: '#f97316'
-                        }
+                        { label: '法院诉讼费', data: schemes.map(s => s.data.courtFee), backgroundColor: '#3b82f6' },
+                        { label: '律师代理费', data: schemes.map(s => s.data.lawyerFee), backgroundColor: '#9333ea' },
+                        { label: '附加费用', data: schemes.map(s => s.data.additionalTotal), backgroundColor: '#f97316' }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        x: { stacked: true },
-                        y: { stacked: true }
-                    }
+                    scales: { x: { stacked: true }, y: { stacked: true } }
                 }
             });
         }
@@ -1669,10 +1906,7 @@
         // ==================== 历史记录 ====================
         function saveToHistory(scheme) {
             let history = JSON.parse(localStorage.getItem('litigationCalculatorHistory') || '[]');
-            history.unshift({
-                ...scheme,
-                id: Date.now()
-            });
+            history.unshift({ ...scheme, id: Date.now() });
             if (history.length > 10) history = history.slice(0, 10);
             localStorage.setItem('litigationCalculatorHistory', JSON.stringify(history));
             loadHistory();
@@ -1745,7 +1979,6 @@
             if (!activeInput) return;
             
             if (['+', '-', '×', '÷', '='].includes(key)) {
-                // 简单计算逻辑
                 return;
             }
             
@@ -1779,15 +2012,19 @@
             const party = document.getElementById('partyName').value || '';
             const agent = document.getElementById('agentName').value || '';
             const amount = document.getElementById('amountInput').value;
-            const total = document.getElementById('totalCost').textContent;
+            const amountChinese = numberToChinese(parseFloat(amount.replace(/,/g, '')) || 0);
+            const stage = document.getElementById('litigationStage').options[document.getElementById('litigationStage').selectedIndex].text;
+            const caseType = document.getElementById('caseType').options[document.getElementById('caseType').selectedIndex].text;
             
             let text = `诉讼费用预算报告\n`;
-            text += `================\n\n`;
+            text += `====================\n`;
             text += `项目名称：${projectName}\n`;
             text += `当事人：${party}\n`;
             text += `经办人：${agent}\n`;
-            text += `标的金额：¥${amount}\n`;
-            text += `生成时间：${new Date().toLocaleString('zh-CN')}\n\n`;
+            text += `报告时间：${new Date().toLocaleString('zh-CN')}\n\n`;
+            text += `标的金额：¥${amount} (${amountChinese})\n`;
+            text += `诉讼阶段：${stage}\n`;
+            text += `案件类型：${caseType}\n`;
             text += `费用明细：\n`;
             text += `- 法院诉讼费：${document.getElementById('courtFeeDisplay').textContent}\n`;
             text += `- 律师代理费：${document.getElementById('lawyerFeeDisplay').textContent}\n`;
@@ -1795,12 +2032,22 @@
             if (currentMode === 'professional') {
                 text += `- 附加费用：${document.getElementById('additionalFeeDisplay').textContent}\n`;
                 text += `- 内部成本：${document.getElementById('internalCostDisplay').textContent}\n`;
+            } else {
+                text += `- 附加费用：¥0\n`;
+                text += `- 内部成本：¥0\n`;
             }
             
-            text += `\n总计：${total}\n`;
-            text += `大写：${document.getElementById('totalCostChinese').textContent}\n\n`;
-            text += `免责声明：本计算结果仅供参考，实际费用以相关机构实际收取为准。\n`;
-            text += `Generated by 法务通 | https://asktai.github.io/AiLTK/`;
+            text += `====================\n`;
+            text += `费用总计：${document.getElementById('totalCost').textContent}\n`;
+            text += `大写：${document.getElementById('totalCostChinese').textContent}\n`;
+            
+            const ratio = (parseFloat(amount.replace(/,/g, '')) || 0) > 0 ? 
+                ((parseFloat(document.getElementById('totalCost').textContent.replace(/[¥,]/g, '')) / parseFloat(amount.replace(/,/g, ''))) * 100).toFixed(1) : 0;
+            text += `成本占比：${ratio}%\n\n`;
+            
+            text += `***免责声明：本计算结果仅供参考，实际费用以相关机构实际收取为准。\n`;
+            text += `Generated by 法务通 | https://asktai.github.io/AiLTK/\n`;
+            text += `====================`;
             
             return text;
         }
@@ -1824,21 +2071,20 @@
             URL.revokeObjectURL(url);
         }
 
-        function exportTXT() {
+        function getFileName() {
             const projectName = document.getElementById('projectName').value || '纠纷案';
             const amount = document.getElementById('amountInput').value.replace(/,/g, '') || '0';
             const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-            const filename = `${projectName}_诉讼费报告(${amount})_${timestamp}.txt`;
-            downloadFile(generateReportText(), filename, 'text/plain;charset=utf-8');
+            return `${projectName}_诉讼费报告(${amount})_${timestamp}`;
+        }
+
+        function exportTXT() {
+            downloadFile(generateReportText(), getFileName() + '.txt', 'text/plain;charset=utf-8');
         }
 
         function exportMD() {
             const text = generateReportText().replace(/\n/g, '\n\n');
-            const projectName = document.getElementById('projectName').value || '纠纷案';
-            const amount = document.getElementById('amountInput').value.replace(/,/g, '') || '0';
-            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-            const filename = `${projectName}_诉讼费报告(${amount})_${timestamp}.md`;
-            downloadFile('# ' + text, filename, 'text/markdown;charset=utf-8');
+            downloadFile('# 诉讼费用预算报告\n\n' + text, getFileName() + '.md', 'text/markdown;charset=utf-8');
         }
 
         function exportCSV() {
@@ -1852,35 +2098,26 @@
             });
             csv += `合计,${document.getElementById('tableTotal').textContent.replace(/[¥,]/g, '')},100%`;
             
-            const projectName = document.getElementById('projectName').value || '纠纷案';
-            const amount = document.getElementById('amountInput').value.replace(/,/g, '') || '0';
-            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-            const filename = `${projectName}_诉讼费报告(${amount})_${timestamp}.csv`;
-            downloadFile('\uFEFF' + csv, filename, 'text/csv;charset=utf-8');
+            downloadFile('\uFEFF' + csv, getFileName() + '.csv', 'text/csv;charset=utf-8');
         }
 
         function saveAsPNG() {
             const element = document.querySelector('.lg\\\\:col-span-7');
             html2canvas(element).then(canvas => {
                 const link = document.createElement('a');
-                const projectName = document.getElementById('projectName').value || '纠纷案';
-                const amount = document.getElementById('amountInput').value.replace(/,/g, '') || '0';
-                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-                link.download = `${projectName}_诉讼费报告(${amount})_${timestamp}.png`;
+                link.download = getFileName() + '.png';
                 link.href = canvas.toDataURL();
                 link.click();
             });
         }
 
         function printPDF() {
-            // 准备打印内容
             document.getElementById('printProjectName').textContent = document.getElementById('projectName').value || '纠纷案';
             document.getElementById('printParty').textContent = document.getElementById('partyName').value || '';
             document.getElementById('printAgent').textContent = document.getElementById('agentName').value || '';
             document.getElementById('printAmount').textContent = '¥' + document.getElementById('amountInput').value;
             document.getElementById('printTime').textContent = new Date().toLocaleString('zh-CN');
             
-            // 克隆结果区域到打印区
             const resultClone = document.querySelector('.lg\\\\:col-span-7').cloneNode(true);
             const printContent = document.getElementById('printContent');
             printContent.innerHTML = '';
@@ -1899,25 +2136,11 @@
             document.getElementById('litigationStage').value = 'first';
             document.getElementById('simpleProcedure').checked = false;
             
-            // 重置专业模式字段
             if (currentMode === 'professional') {
-                document.getElementById('enablePreservation').checked = false;
-                document.getElementById('enableInsurance').checked = false;
-                document.getElementById('travelFee').value = 0;
-                document.getElementById('announcementFee').value = 0;
-                document.getElementById('evaluationFee').value = 0;
-                document.getElementById('investigationFee').value = 0;
-                document.getElementById('otherFee').value = 0;
-                document.getElementById('legalHours').value = 0;
-                document.getElementById('managementCost').value = 0;
+                ['enablePreservation', 'enableInsurance'].forEach(id => document.getElementById(id).checked = false);
+                ['travelFee', 'announcementFee', 'evaluationFee', 'investigationFee', 'otherFee', 'legalHours', 'managementCost'].forEach(id => document.getElementById(id).value = 0);
             }
             
-            calculateAll();
-        }
-
-        // 更新地区律师费标准（占位）
-        function updateLawyerFeeStandard() {
-            // 不同地区可以设置不同的默认费率
             calculateAll();
         }
 
