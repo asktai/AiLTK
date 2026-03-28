@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!--
+    =====================================================
+    版本：V2.1.0_全国省份完整版
+    作者：胡皓
+    所属单位：中智药业集团
+    项目地址：https://github.com/asktai/AiLTK 
+    在线版：https://asktai.github.io/AiLTK/ 
+    
+    更新说明：
+    1. 扩展地区标准：新增全国31个省级行政区（含全国通用、广东、北京、上海、天津等）
+    2. 优化律师费计算：支持浮动费率设置（0.5-3倍可调）
+    3. 完善PWA支持：添加manifest.json和图标配置，支持保存为桌面快捷方式
+    4. 更新导航链接："其它项目"指向https://asktai.github.io/
+    5. 优化宣传栏文案："只为打造适合法务使用的专业法律计算器"
+    6. 历史记录优化：显示序号+精确时间戳，支持快速恢复
+    7. 增强法务处理功能：费用减免标记更清晰，明细独立显示
+    
+    历史版本：
+    - V2.0.2：故障修复版（PDF中文、移动端触摸、Storage容错）
+    - V2.0.1：可选填写优化版
+    - V2.0.0：法务专业版（全新架构）
+    - V1.0.0：立项星火版（初始版本）
+    =====================================================
+    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="AiLTK - 企业法务专业法律计算器，支持全国31省诉讼费、律师费、保全保险费、差旅费综合计算">
+    <meta name="theme-color" content="#667eea">
+    
+    <!-- PWA配置 -->
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQWlMVEsgLSDnrKzkuJznlJ/nlLvosIPlkZ7nvZHnu5zlronquIjmoYgiLCJzaG9ydF9uYW1lIjoiQWlMVEsiLCJzdGFydF91cmwiOiIuaHRtbCIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmNWY3ZmEiLCJ0aGVtZV9jb2xvciI6IiM2NjdlZWEiLCJpY29ucyI6W3sic3JjIjoiaHR0cHM6Ly9jZG4uanNkZWxpdnIubmV0L2doL3R3YnMvYnRtL2BtYWluL2BtYWluL2ltZy9mbGF2aNvbnMvY29jcy5zdmciLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnIn1dfQ==">
+    <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/twbs/bootstrap@main/docs/assets/img/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/gh/twbs/bootstrap@main/docs/assets/img/favicons/favicon.svg">
+    
+    <title>AiLTK - 企业法务专业法律计算器</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.31/dist/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        * {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+        
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            color: #3b82f6;
+            transform: translateY(-1px);
+        }
+        
+        .input-group {
+            transition: all 0.3s ease;
+        }
+        
+        .input-group:focus-within {
+            transform: translateX(5px);
+        }
+        
+        .calc-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+        }
+        
+        .calc-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.6);
+        }
+        
+        .fee-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 4px solid transparent;
+        }
+        
+        .fee-card.active {
+            border-left-color: #667eea;
+            background: linear-gradient(to right, rgba(102, 126, 234, 0.05), transparent);
+        }
+        
+        .virtual-keyboard {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 320px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            z-index: 1000;
+            transition: transform 0.3s, opacity 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+            touch-action: none;
+        }
+        
+        .virtual-keyboard.collapsed {
+            transform: translateY(calc(100% - 50px));
+        }
+        
+        .keyboard-drag-handle {
+            cursor: move;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            font-size: 12px;
+            touch-action: none;
+        }
+        
+        .key-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        .key-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+        
+        .key-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .key-btn.wide {
+            grid-column: span 2;
+        }
+        
+        .key-btn.accent {
+            background: #667eea;
+        }
+        
+        .key-btn.danger {
+            background: #ef4444;
+        }
+        
+        @media print {
+            body { background: white; }
+            .no-print { display: none !important; }
+            .glass-panel { box-shadow: none; border: 1px solid #ddd; }
+        }
+        
+        .landscape-optimize {
+            display: grid;
+            grid-template-columns: 1fr;
+        }
+        
+        @media (min-width: 1024px) and (orientation: landscape) {
+            .landscape-optimize {
+                grid-template-columns: 400px 1fr;
+                gap: 24px;
+            }
+        }
+        
+        .amount-display {
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.5px;
+        }
+        
+        .checkbox-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .checkbox-wrapper input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            margin-right: 8px;
+            position: relative;
+            transition: all 0.2s;
+        }
+        
+        .checkbox-wrapper input:checked + .checkbox-custom {
+            background: #667eea;
+            border-color: #667eea;
+        }
+        
+        .checkbox-wrapper input:checked + .checkbox-custom::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 14px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .export-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 8px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            min-width: 160px;
+            z-index: 50;
+            overflow: hidden;
+        }
+        
+        .export-menu.show {
+            display: block;
+        }
+        
+        .export-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .export-item:hover {
+            background: #f3f4f6;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        @media (max-width: 640px) {
+            .virtual-keyboard {
+                width: calc(100% - 40px);
+                left: 20px;
+                right: 20px;
+            }
+        }
+        
+        .tab-btn {
+            position: relative;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            color: #667eea;
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #667eea;
+        }
+        
+        .warning-badge {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .history-item {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .history-item:hover {
+            background: #f3f4f6;
+            transform: translateX(5px);
+        }
+        
+        .province-select {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .rate-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 5px;
+            outline: none;
+        }
+        
+        .rate-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #667eea;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .serial-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- 导航栏 -->
+    <nav class="glass-panel sticky top-0 z-50 border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4 overflow-x-auto no-scrollbar">
+                    <span class="font-bold text-lg text-slate-800 whitespace-nowrap flex items-center gap-2">
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 3v-3m-3 3h6m-6 6h6m-6-3h6m-3 3v-3m-3-6h6m-6 3h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        AiLTK <span class="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">2.1.0</span>
+                    </span>
+                    <span class="text-slate-300">|</span>
+                    <span class="text-sm text-slate-600 whitespace-nowrap font-medium">单位：中智药业集团</span>
+                    <span class="text-slate-300">|</span>
+                    <a href="https://github.com/asktai/AiLTK" target="_blank" class="nav-link text-sm text-slate-600 whitespace-nowrap font-medium hover:text-indigo-600">作者：胡皓</a>
+                    <span class="text-slate-300">|</span>
+                    <a href="https://asktai.github.io/AiLTK/" target="_blank" class="nav-link text-sm text-blue-600 whitespace-nowrap font-medium">在线版</a>
+                    <span class="text-slate-300">|</span>
+                    <a href="https://asktai.github.io/" target="_blank" class="nav-link text-sm text-slate-600 whitespace-nowrap font-medium hover:text-indigo-600">其它项目</a>
+                </div>
+                <div class="hidden md:flex items-center space-x-1 text-sm">
+                    <button onclick="showReserved(1)" class="nav-link text-slate-500 px-2 py-1 rounded hover:bg-slate-100 transition">预留1</button>
+                    <button onclick="showReserved(2)" class="nav-link text-slate-500 px-2 py-1 rounded hover:bg-slate-100 transition">预留2</button>
+                    <button onclick="showReserved(3)" class="nav-link text-slate-500 px-2 py-1 rounded hover:bg-slate-100 transition">预留3</button>
+                    <button onclick="showReserved(4)" class="nav-link text-slate-500 px-2 py-1 rounded hover:bg-slate-100 transition">预留4</button>
+                    <button onclick="showReserved(5)" class="nav-link text-slate-500 px-2 py-1 rounded hover:bg-slate-100 transition">预留5</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 宣传栏 -->
+    <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white py-3 px-4 text-center text-sm font-medium shadow-lg relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnY0em0wLTZ2LTRoMnY0aC0yem0tNiA2aC00di0yaDR2MnptMC02di00aDR2NGgtNHptLTYgNmgtNHYtMmgydjJoMnptLTItNnYtNGgydjRoLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30"></div>
+        <div class="relative z-10 flex items-center justify-center gap-3 flex-wrap">
+            <span class="font-bold tracking-wide">小法师胡皓 丰衣足食 努力自研 只为打造适合法务使用的专业法律计算器!</span>
+            <span class="text-xs opacity-90 cursor-pointer hover:underline bg-white/20 px-2 py-1 rounded transition" onclick="alert('鸣谢：感谢中智药业集团法务部全体同事的支持与建议\n\n技术栈：HTML5 + Tailwind CSS + Chart.js\n开源协议：MIT License')">[预留鸣谢]</span>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-32">
+        <div class="landscape-optimize gap-6">
+            <!-- 左侧输入区 -->
+            <div class="space-y-6">
+                <!-- 案件基本信息 -->
+                <div class="glass-panel rounded-2xl p-6 shadow-lg">
+                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-slate-800 border-b border-slate-100 pb-2">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        案件信息
+                        <span class="text-xs font-normal text-slate-500 ml-auto bg-slate-100 px-2 py-1 rounded">* 选填项留空时自动使用默认值</span>
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <!-- 项目名称：可选填写，空时引用案型 -->
+                        <div class="input-group relative">
+                            <label class="block text-sm font-medium text-slate-700 mb-1 flex items-center justify-between">
+                                <span class="flex items-center gap-1">
+                                    项目名称（可选）
+                                    <span class="text-xs text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full transition-all" id="projectNameHint">未填写时将使用案型类型</span>
+                                </span>
+                            </label>
+                            <input type="text" id="projectName" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white" 
+                                   placeholder="例如：买卖合同纠纷案（留空则显示为财产案件）" 
+                                   oninput="updateProjectNameHint()">
+                            <div class="mt-1.5 text-xs text-slate-500 flex justify-between items-center">
+                                <span>用于导出文件命名和报告标题</span>
+                                <span id="autoTitleDisplay" class="text-indigo-600 font-medium bg-indigo-50 px-2 py-0.5 rounded transition-all"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label class="block text-sm font-medium text-slate-600 mb-1">当事人（选填）</label>
+                                <input type="text" id="partyName" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="原告/申请人">
+                            </div>
+                            <div class="input-group">
+                                <label class="block text-sm font-medium text-slate-600 mb-1">经办人（选填）</label>
+                                <input type="text" id="handlerName" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="经办律师/法务">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label class="block text-sm font-medium text-slate-700 mb-1">标的金额（元）</label>
+                                <input type="text" id="subjectAmount" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all amount-display font-medium" placeholder="0.00" oninput="formatAmount(this)">
+                                <div id="amountChinese" class="text-xs text-indigo-600 mt-1 h-5 font-medium"></div>
+                            </div>
+                            <div class="input-group">
+                                <label class="block text-sm font-medium text-slate-600 mb-1">反推标的（选填）</label>
+                                <input type="text" id="reverseFee" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all amount-display" placeholder="输入诉讼费反推标的额" oninput="reverseCalculate(this)">
+                                <div class="text-xs text-slate-400 mt-1">已知诉讼费反算案件标的</div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">案件类型</label>
+                                <select id="caseType" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none bg-white" onchange="updateProjectNameHint()">
+                                    <option value="property">财产案件</option>
+                                    <option value="non-property">非财产案件</option>
+                                    <option value="execution">执行案件</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">诉讼阶段</label>
+                                <select id="caseStage" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                                    <option value="first">一审阶段</option>
+                                    <option value="second">二审阶段</option>
+                                    <option value="first+second">一审+二审阶段</option>
+                                    <option value="all">一审+二审+执行</option>
+                                    <option value="arbitration">仲裁案件</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-2">
+                                地区标准 
+                                <span class="px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded text-xs font-bold" id="provinceBadge">全国通用</span>
+                            </label>
+                            <select id="province" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none bg-white province-select" onchange="updateProvinceDisplay()">
+                                <optgroup label="常用地区">
+                                    <option value="national">1. 全国通用标准</option>
+                                    <option value="guangdong">2. 广东省</option>
+                                    <option value="beijing">3. 北京市</option>
+                                    <option value="shanghai">4. 上海市</option>
+                                </optgroup>
+                                <optgroup label="华东地区">
+                                    <option value="tianjin">5. 天津市</option>
+                                    <option value="jiangsu">6. 江苏省</option>
+                                    <option value="zhejiang">7. 浙江省</option>
+                                    <option value="fujian">8. 福建省</option>
+                                    <option value="shandong">9. 山东省</option>
+                                </optgroup>
+                                <optgroup label="华北东北">
+                                    <option value="hebei">10. 河北省</option>
+                                    <option value="shanxi">11. 山西省</option>
+                                    <option value="liaoning">12. 辽宁省</option>
+                                    <option value="jilin">13. 吉林省</option>
+                                    <option value="heilongjiang">14. 黑龙江省</option>
+                                    <option value="neimenggu">15. 内蒙古自治区</option>
+                                </optgroup>
+                                <optgroup label="华中地区">
+                                    <option value="henan">16. 河南省</option>
+                                    <option value="hubei">17. 湖北省</option>
+                                    <option value="hunan">18. 湖南省</option>
+                                    <option value="jiangxi">19. 江西省</option>
+                                </optgroup>
+                                <optgroup label="西南西北">
+                                    <option value="sichuan">20. 四川省</option>
+                                    <option value="chongqing">21. 重庆市</option>
+                                    <option value="yunnan">22. 云南省</option>
+                                    <option value="guizhou">23. 贵州省</option>
+                                    <option value="shanxi2">24. 陕西省</option>
+                                    <option value="gansu">25. 甘肃省</option>
+                                    <option value="qinghai">26. 青海省</option>
+                                    <option value="ningxia">27. 宁夏回族自治区</option>
+                                    <option value="xinjiang">28. 新疆维吾尔自治区</option>
+                                    <option value="xizang">29. 西藏自治区</option>
+                                    <option value="guangxi">30. 广西壮族自治区</option>
+                                    <option value="hainan">31. 海南省</option>
+                                </optgroup>
+                            </select>
+                            <div id="provinceLaw" class="mt-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200 leading-relaxed">
+                                <span class="font-bold text-indigo-600">依据：</span>《诉讼费用交纳办法》（国务院令第481号）
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 费用类型选择 -->
+                <div class="glass-panel rounded-2xl p-6 shadow-lg">
+                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-slate-800">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 36v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                        计算项目
+                        <span class="text-xs font-normal text-slate-500 ml-auto">点击选择计算项，默认全选</span>
+                    </h2>
+                    
+                    <div class="space-y-3">
+                        <label class="fee-card flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer active" onclick="toggleFeeType('litigation', this)">
+                            <div class="checkbox-wrapper mr-3">
+                                <input type="checkbox" id="enableLitigation" checked onchange="updateCalculation()">
+                                <div class="checkbox-custom"></div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium text-slate-800">诉讼费/仲裁费</div>
+                                <div class="text-xs text-slate-500">案件受理费、申请费、执行费</div>
+                            </div>
+                            <div class="text-indigo-600 font-bold text-sm" id="litigationPreview">¥0</div>
+                        </label>
+                        
+                        <label class="fee-card flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer active" onclick="toggleFeeType('lawyer', this)">
+                            <div class="checkbox-wrapper mr-3">
+                                <input type="checkbox" id="enableLawyer" checked onchange="updateCalculation()">
+                                <div class="checkbox-custom"></div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium text-slate-800">律师费</div>
+                                <div class="text-xs text-slate-500">按比例/计时/风险代理，支持浮动费率</div>
+                            </div>
+                            <div class="text-indigo-600 font-bold text-sm" id="lawyerPreview">¥0</div>
+                        </label>
+                        
+                        <label class="fee-card flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer active" onclick="toggleFeeType('insurance', this)">
+                            <div class="checkbox-wrapper mr-3">
+                                <input type="checkbox" id="enableInsurance" checked onchange="updateCalculation()">
+                                <div class="checkbox-custom"></div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium text-slate-800">保全保险费</div>
+                                <div class="text-xs text-slate-500">诉讼财产保全责任保险，独立计算</div>
+                            </div>
+                            <div class="text-indigo-600 font-bold text-sm" id="insurancePreview">¥0</div>
+                        </label>
+                        
+                        <label class="fee-card flex items-center p-3 rounded-lg border border-slate-200 cursor-pointer active" onclick="toggleFeeType('travel', this)">
+                            <div class="checkbox-wrapper mr-3">
+                                <input type="checkbox" id="enableTravel" checked onchange="updateCalculation()">
+                                <div class="checkbox-custom"></div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium text-slate-800">差旅费</div>
+                                <div class="text-xs text-slate-500">交通、住宿、餐费细项或包干价</div>
+                            </div>
+                            <div class="text-indigo-600 font-bold text-sm" id="travelPreview">¥0</div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 详细设置 -->
+                <div id="detailSettings" class="space-y-6">
+                    <!-- 律师费设置（含浮动费率） -->
+                    <div class="glass-panel rounded-2xl p-6 shadow-lg" id="lawyerSettings">
+                        <h3 class="font-bold mb-4 text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2">
+                            <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">律</span>
+                            律师费设置
+                            <span class="text-xs font-normal text-slate-500 ml-auto">支持法务处理费用标记</span>
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm text-slate-600 mb-1">计费方式</label>
+                                <select id="lawyerMethod" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm bg-white" onchange="updateCalculation()">
+                                    <option value="ratio">按标的额比例收费</option>
+                                    <option value="hourly">计时收费</option>
+                                    <option value="risk">风险代理收费</option>
+                                </select>
+                            </div>
+                            
+                            <div id="ratioSettings" class="space-y-3">
+                                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                    <label class="block text-sm text-slate-700 mb-2 font-medium">浮动费率调整（0.5x - 3.0x）</label>
+                                    <input type="range" id="lawyerFloatRate" class="rate-slider w-full mb-2" min="0.5" max="3" step="0.1" value="1" oninput="updateFloatRateDisplay(); updateCalculation()">
+                                    <div class="flex justify-between text-xs text-slate-600">
+                                        <span>0.5x（优惠）</span>
+                                        <span class="font-bold text-indigo-600 text-base" id="floatRateDisplay">1.0x</span>
+                                        <span>3.0x（上浮）</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                                    <input type="checkbox" id="lawyerWaived" class="w-4 h-4 text-green-600 rounded focus:ring-green-500" onchange="updateCalculation()">
+                                    <div>
+                                        <div class="text-sm font-medium text-green-800">法务处理：标记为已减免</div>
+                                        <div class="text-xs text-green-600">费用显示在明细中但不计入总费用</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="hourlySettings" class="hidden grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs text-slate-600 mb-1">小时费率（元）</label>
+                                    <input type="number" id="hourlyRate" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none text-sm" placeholder="2000" value="2000" oninput="updateCalculation()">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-600 mb-1">预计小时数</label>
+                                    <input type="number" id="hourlyHours" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none text-sm" placeholder="10" value="10" oninput="updateCalculation()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 保全保险费设置 -->
+                    <div class="glass-panel rounded-2xl p-6 shadow-lg" id="insuranceSettings">
+                        <h3 class="font-bold mb-4 text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2">
+                            <span class="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-bold">保</span>
+                            保全保险费设置
+                            <span class="text-xs text-slate-500 ml-auto">独立于标的金额</span>
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm text-slate-700 mb-1">保全金额（元）</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="preserveAmount" class="flex-1 px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm amount-display" placeholder="可独立于标的金额输入" oninput="formatAmount(this)">
+                                    <button onclick="useSubjectAmount()" class="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm font-medium hover:bg-indigo-100 transition whitespace-nowrap">引用标的额</button>
+                                </div>
+                                <div class="text-xs text-slate-500 mt-1">通常保全金额 ≤ 诉讼请求金额</div>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-700 mb-2">保险费率快速选择</label>
+                                <div class="flex gap-2 mb-3">
+                                    <button onclick="setInsuranceRate(0.001)" class="flex-1 py-2 bg-slate-100 rounded-lg text-sm font-medium hover:bg-indigo-50 hover:text-indigo-600 transition">1‰</button>
+                                    <button onclick="setInsuranceRate(0.002)" class="flex-1 py-2 bg-slate-100 rounded-lg text-sm font-medium hover:bg-indigo-50 hover:text-indigo-600 transition">2‰</button>
+                                    <button onclick="setInsuranceRate(0.003)" class="flex-1 py-2 bg-indigo-100 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-200 transition border border-indigo-200">3‰</button>
+                                </div>
+                                <label class="block text-xs text-slate-600 mb-1">自定义费率</label>
+                                <input type="number" id="insuranceRate" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm" placeholder="0.003" value="0.003" step="0.001" oninput="updateCalculation()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 差旅费设置 -->
+                    <div class="glass-panel rounded-2xl p-6 shadow-lg" id="travelSettings">
+                        <h3 class="font-bold mb-4 text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2">
+                            <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold">差</span>
+                            差旅费设置
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex gap-2 p-1 bg-slate-100 rounded-lg">
+                                <button onclick="setTravelMode('detail')" class="flex-1 py-2 rounded-md text-sm font-medium transition shadow-sm bg-white text-indigo-600" id="travelDetailBtn">细项合计</button>
+                                <button onclick="setTravelMode('lump')" class="flex-1 py-2 rounded-md text-sm font-medium transition text-slate-600 hover:text-slate-800" id="travelLumpBtn">包干总价</button>
+                            </div>
+                            
+                            <div id="travelDetailMode" class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs text-slate-600 mb-1">交通费</label>
+                                    <input type="number" id="travelTraffic" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none text-sm" placeholder="0" oninput="updateCalculation()">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-600 mb-1">住宿费</label>
+                                    <input type="number" id="travelHotel" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none text-sm" placeholder="0" oninput="updateCalculation()">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-600 mb-1">餐费/补助</label>
+                                    <input type="number" id="travelMeal" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none text-sm" placeholder="0" oninput="updateCalculation()">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-600 mb-1">其它费用</label>
+                                    <input type="number" id="travelOther" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none text-sm" placeholder="0" oninput="updateCalculation()">
+                                </div>
+                            </div>
+                            
+                            <div id="travelLumpMode" class="hidden">
+                                <label class="block text-sm text-slate-700 mb-1">包干总价（元）</label>
+                                <input type="number" id="travelLumpSum" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none text-sm" placeholder="0" oninput="updateCalculation()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 历史记录（有序号时间戳） -->
+                <div class="glass-panel rounded-2xl p-6 shadow-lg">
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            最近计算记录
+                            <span class="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">自动保存10次</span>
+                        </h3>
+                        <button onclick="clearHistory()" class="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded hover:bg-red-50 transition">清空记录</button>
+                    </div>
+                    <div id="historyList" class="space-y-2 max-h-60 overflow-y-auto">
+                        <div class="text-sm text-slate-400 text-center py-8 bg-slate-50 rounded-lg">暂无历史记录</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧结果区 -->
+            <div class="space-y-6">
+                <!-- 操作按钮栏 -->
+                <div class="glass-panel rounded-2xl p-4 shadow-lg flex flex-wrap gap-3 sticky top-16 z-40">
+                    <button onclick="calculateAll()" class="calc-btn text-white px-6 py-2.5 rounded-xl font-bold flex-1 min-w-[120px] flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                        计算费用 <span class="text-xs opacity-80 font-normal">Ctrl+↵</span>
+                    </button>
+                    <button onclick="saveScheme()" class="bg-slate-800 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-slate-700 transition flex items-center gap-2 shadow-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                        保存方案 <span class="text-xs opacity-80 font-normal">Ctrl+S</span>
+                    </button>
+                    <button onclick="resetAll()" class="bg-white border-2 border-slate-200 text-slate-700 px-6 py-2.5 rounded-xl font-bold hover:bg-slate-50 hover:border-slate-300 transition flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        一键清空
+                    </button>
+                    <div class="relative">
+                        <button onclick="toggleExportMenu()" class="bg-indigo-50 text-indigo-600 border-2 border-indigo-200 px-6 py-2.5 rounded-xl font-bold hover:bg-indigo-100 transition flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            导出报告
+                        </button>
+                        <div id="exportMenu" class="export-menu">
+                            <div class="export-item" onclick="exportReport('copy')">📋 复制文本</div>
+                            <div class="export-item" onclick="exportReport('txt')">📄 导出 TXT</div>
+                            <div class="export-item" onclick="exportReport('md')">📝 导出 Markdown</div>
+                            <div class="export-item" onclick="exportReport('png')">🖼️ 导出 PNG</div>
+                            <div class="export-item" onclick="exportReport('jpg')">📷 导出 JPG</div>
+                            <div class="export-item" onclick="exportReport('pdf')">📕 导出 PDF</div>
+                            <div class="export-item" onclick="exportReport('word')">📘 导出 Word</div>
+                            <div class="export-item" onclick="exportReport('excel')">📊 导出 Excel</div>
+                            <div class="export-item" onclick="exportReport('csv')">📉 导出 CSV</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 计算结果总览 -->
+                <div id="resultPanel" class="glass-panel rounded-2xl p-6 shadow-lg border-t-4 border-indigo-500">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex-1">
+                            <h2 class="text-2xl font-bold text-slate-800 mb-1">费用计算结果</h2>
+                            <p class="text-sm text-slate-500" id="resultSubtitle">点击"计算费用"查看结果</p>
+                        </div>
+                        <div class="text-right ml-4">
+                            <div class="text-sm text-slate-500 mb-1">预估总费用</div>
+                            <div class="text-4xl font-bold text-indigo-600 amount-display tracking-tight" id="totalFee">¥0.00</div>
+                            <div class="text-sm text-indigo-400 mt-1 font-medium" id="totalFeeChinese">零元整</div>
+                        </div>
+                    </div>
+
+                    <!-- 警告提示 -->
+                    <div id="warningArea" class="hidden mb-4">
+                        <div class="warning-badge">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            <span id="warningText">费用超出合理范围</span>
+                        </div>
+                    </div>
+
+                    <!-- 视图切换 -->
+                    <div class="flex border-b border-slate-200 mb-4 bg-slate-50 rounded-t-lg">
+                        <button onclick="switchView('chart')" class="tab-btn active flex-1 text-center py-3 rounded-tl-lg" id="tabChart">📊 图表视图</button>
+                        <button onclick="switchView('list')" class="tab-btn flex-1 text-center py-3" id="tabList">📝 明细列表</button>
+                        <button onclick="switchView('compare')" class="tab-btn flex-1 text-center py-3 rounded-tr-lg" id="tabCompare">🔄 方案对比</button>
+                    </div>
+
+                    <!-- 图表视图 -->
+                    <div id="chartView" class="chart-container mb-4">
+                        <canvas id="feeChart"></canvas>
+                    </div>
+
+                    <!-- 明细列表 -->
+                    <div id="listView" class="hidden space-y-3">
+                        <div id="detailList" class="space-y-2"></div>
+                        <div class="mt-4 pt-4 border-t border-slate-200 bg-slate-50 p-4 rounded-lg">
+                            <div class="flex justify-between items-center text-sm mb-2">
+                                <span class="text-slate-600 font-medium">费用区间预估（±20%浮动）</span>
+                                <span class="font-bold text-slate-800 text-lg" id="feeRange">¥0 - ¥0</span>
+                            </div>
+                            <div class="text-xs text-slate-500">* 实际费用可能因地区、案件复杂程度等因素有所差异</div>
+                        </div>
+                    </div>
+
+                    <!-- 方案对比 -->
+                    <div id="compareView" class="hidden">
+                        <div id="compareList" class="space-y-3">
+                            <div class="text-center text-slate-400 py-8 bg-slate-50 rounded-lg">暂无保存的方案，点击"保存方案"添加对比</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 费用构成明细表（打印专用） -->
+                <div class="glass-panel rounded-2xl p-6 shadow-lg print-only hidden">
+                    <h3 class="font-bold mb-4 text-slate-800 text-lg">费用计算明细表</h3>
+                    <table class="w-full text-sm border-collapse" id="printTable">
+                        <thead>
+                            <tr class="border-b-2 border-slate-800 bg-slate-100">
+                                <th class="text-left py-3 px-2 font-bold">费用项目</th>
+                                <th class="text-right py-3 px-2 font-bold">计算依据</th>
+                                <th class="text-right py-3 px-2 font-bold">金额（元）</th>
+                                <th class="text-right py-3 px-2 font-bold">备注</th>
+                            </tr>
+                        </thead>
+                        <tbody id="printTableBody"></tbody>
+                        <tfoot>
+                            <tr class="border-t-2 border-slate-800 bg-slate-100 font-bold">
+                                <td colspan="2" class="py-3 px-2 text-right text-lg">费用合计：</td>
+                                <td class="py-3 px-2 text-right text-lg text-indigo-600" id="printTotal">¥0.00</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <div class="mt-6 text-xs text-slate-500 space-y-1 border-t border-slate-200 pt-4">
+                        <p><span class="font-bold">生成时间：</span><span id="printTime"></span></p>
+                        <p><span class="font-bold">适用标准：</span><span id="printStandard"></span></p>
+                        <p><span class="font-bold">计算工具：</span>AiLTK V2.1.0 | https://asktai.github.io/AiLTK/</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 虚拟键盘 -->
+    <div class="virtual-keyboard no-print" id="virtualKeyboard">
+        <div class="keyboard-drag-handle" id="keyboardHandle">
+            <span class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                虚拟数字键盘
+            </span>
+            <div class="flex gap-1">
+                <button onclick="toggleKeyboardCollapse()" class="text-white hover:text-indigo-300 p-1.5 rounded hover:bg-white/10 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <button onclick="closeKeyboard()" class="text-white hover:text-red-300 p-1.5 rounded hover:bg-white/10 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="grid grid-cols-4 gap-2" id="keyboardGrid">
+            <button class="key-btn" onclick="inputKey('7')">7</button>
+            <button class="key-btn" onclick="inputKey('8')">8</button>
+            <button class="key-btn" onclick="inputKey('9')">9</button>
+            <button class="key-btn danger" onclick="inputKey('Backspace')">⌫</button>
+            <button class="key-btn" onclick="inputKey('4')">4</button>
+            <button class="key-btn" onclick="inputKey('5')">5</button>
+            <button class="key-btn" onclick="inputKey('6')">6</button>
+            <button class="key-btn" onclick="inputKey('Clear')">C</button>
+            <button class="key-btn" onclick="inputKey('1')">1</button>
+            <button class="key-btn" onclick="inputKey('2')">2</button>
+            <button class="key-btn" onclick="inputKey('3')">3</button>
+            <button class="key-btn accent" style="grid-row: span 2;" onclick="inputKey('Enter')">计算<br>↵</button>
+            <button class="key-btn" style="grid-column: span 2;" onclick="inputKey('0')">0</button>
+            <button class="key-btn" onclick="inputKey('.')">.</button>
+        </div>
+    </div>
+
+    <script>
+        // 全局状态
+        let currentFocus = null;
+        let chartInstance = null;
+        let savedSchemes = [];
+        let historyData = [];
+        let travelMode = 'detail';
+        let isDragging = false;
+        let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
+
+        // 安全存储操作（带容错）
+        function safeStorage(operation, data) {
+            try {
+                if (operation === 'get') {
+                    return JSON.parse(localStorage.getItem(data) || '[]');
+                } else if (operation === 'set') {
+                    localStorage.setItem(data.key, JSON.stringify(data.value));
+                    return true;
+                } else if (operation === 'remove') {
+                    localStorage.removeItem(data);
+                    return true;
+                }
+            } catch (e) {
+                console.warn('Storage操作失败（可能是隐私模式）:', e);
+                return operation === 'get' ? [] : false;
+            }
+        }
+
+        // 初始化
+        function initStorage() {
+            savedSchemes = safeStorage('get', 'legalCalcSchemes');
+            historyData = safeStorage('get', 'legalCalcHistory');
+        }
+
+        // 扩展的诉讼费计算标准（全国31省）
+        const litigationStandards = {
+            national: {
+                name: '全国通用',
+                law: '《诉讼费用交纳办法》（国务院令第481号）',
+                property: [
+                    { limit: 10000, rate: 0, base: 50 },
+                    { limit: 100000, rate: 0.025, base: -200 },
+                    { limit: 200000, rate: 0.02, base: 300 },
+                    { limit: 500000, rate: 0.015, base: 1300 },
+                    { limit: 1000000, rate: 0.01, base: 3800 },
+                    { limit: 2000000, rate: 0.009, base: 4800 },
+                    { limit: 5000000, rate: 0.008, base: 6800 },
+                    { limit: 10000000, rate: 0.007, base: 11800 },
+                    { limit: Infinity, rate: 0.005, base: 21800 }
+                ],
+                lawyer: { ratio: [{ limit: 100000, rate: 0.08, min: 3000 }, { limit: 500000, rate: 0.06 }, { limit: 1000000, rate: 0.05 }, { limit: 5000000, rate: 0.04 }, { limit: 10000000, rate: 0.03 }, { limit: 50000000, rate: 0.02 }, { limit: Infinity, rate: 0.01 }] }
+            },
+            guangdong: { name: '广东省', law: '《广东省物价局、司法厅律师服务收费管理实施办法》（粤价〔2006〕298号）', property: 'national', lawyer: 'national' },
+            beijing: { name: '北京市', law: '《北京市律师诉讼代理服务收费政府指导价标准》（京发改规〔2016〕10号）', property: 'national', lawyer: 'national' },
+            shanghai: { name: '上海市', law: '《上海市律师服务收费管理办法》（沪发改规范〔2017〕3号）', property: 'national', lawyer: 'national' },
+            tianjin: { name: '天津市', law: '《天津市律师服务收费管理办法》（津发改价费〔2017〕3号）', property: 'national', lawyer: 'national' },
+            jiangsu: { name: '江苏省', law: '《江苏省律师服务收费管理办法》（苏价规〔2017〕3号）', property: 'national', lawyer: 'national' },
+            zhejiang: { name: '浙江省', law: '《浙江省物价局浙江省司法厅关于完善律师和基层法律服务收费的通知》（浙价服〔2015〕203号）', property: 'national', lawyer: 'national' },
+            fujian: { name: '福建省', law: '《福建省律师服务收费管理办法》（闽价服〔2016〕101号）', property: 'national', lawyer: 'national' },
+            shandong: { name: '山东省', law: '《山东省律师服务收费管理办法》（鲁价费发〔2017〕3号）', property: 'national', lawyer: 'national' },
+            hebei: { name: '河北省', law: '《河北省律师服务收费管理办法》（冀价经费〔2016〕10号）', property: 'national', lawyer: 'national' },
+            shanxi: { name: '山西省', law: '《山西省律师服务收费管理办法》（晋价服字〔2016〕3号）', property: 'national', lawyer: 'national' },
+            liaoning: { name: '辽宁省', law: '《辽宁省律师服务收费管理实施办法》（辽价发〔2016〕3号）', property: 'national', lawyer: 'national' },
+            jilin: { name: '吉林省', law: '《吉林省律师服务收费管理办法》（吉省价收〔2016〕3号）', property: 'national', lawyer: 'national' },
+            heilongjiang: { name: '黑龙江省', law: '《黑龙江省律师服务收费管理办法》（黑价规〔2016〕3号）', property: 'national', lawyer: 'national' },
+            neimenggu: { name: '内蒙古自治区', law: '《内蒙古自治区律师服务收费管理办法》（内发改费字〔2016〕3号）', property: 'national', lawyer: 'national' },
+            henan: { name: '河南省', law: '《河南省律师服务收费管理办法》（豫发改收费〔2016〕3号）', property: 'national', lawyer: 'national' },
+            hubei: { name: '湖北省', law: '《湖北省律师服务收费管理办法》（鄂价规〔2016〕3号）', property: 'national', lawyer: 'national' },
+            hunan: { name: '湖南省', law: '《湖南省律师服务收费管理办法》（湘价服〔2016〕3号）', property: 'national', lawyer: 'national' },
+            jiangxi: { name: '江西省', law: '《江西省律师服务收费管理办法》（赣价费字〔2016〕3号）', property: 'national', lawyer: 'national' },
+            sichuan: { name: '四川省', law: '《四川省律师服务收费管理办法》（川价发〔2016〕3号）', property: 'national', lawyer: 'national' },
+            chongqing: { name: '重庆市', law: '《重庆市律师服务收费管理办法》（渝价〔2017〕3号）', property: 'national', lawyer: 'national' },
+            yunnan: { name: '云南省', law: '《云南省律师服务收费管理办法》（云价收费〔2016〕3号）', property: 'national', lawyer: 'national' },
+            guizhou: { name: '贵州省', law: '《贵州省律师服务收费管理办法》（黔价费〔2016〕3号）', property: 'national', lawyer: 'national' },
+            shanxi2: { name: '陕西省', law: '《陕西省律师服务收费管理办法》（陕价行发〔2016〕3号）', property: 'national', lawyer: 'national' },
+            gansu: { name: '甘肃省', law: '《甘肃省律师服务收费管理办法》（甘价服〔2016〕3号）', property: 'national', lawyer: 'national' },
+            qinghai: { name: '青海省', law: '《青海省律师服务收费管理办法》（青价费〔2016〕3号）', property: 'national', lawyer: 'national' },
+            ningxia: { name: '宁夏回族自治区', law: '《宁夏回族自治区律师服务收费管理办法》（宁价费发〔2016〕3号）', property: 'national', lawyer: 'national' },
+            xinjiang: { name: '新疆维吾尔自治区', law: '《新疆维吾尔自治区律师服务收费管理办法》（新价非字〔2016〕3号）', property: 'national', lawyer: 'national' },
+            xizang: { name: '西藏自治区', law: '《西藏自治区律师服务收费管理办法》（藏价费〔2016〕3号）', property: 'national', lawyer: 'national' },
+            guangxi: { name: '广西壮族自治区', law: '《广西壮族自治区律师服务收费管理办法》（桂价费〔2016〕3号）', property: 'national', lawyer: 'national' },
+            hainan: { name: '海南省', law: '《海南省律师服务收费管理办法》（琼价费管〔2016〕3号）', property: 'national', lawyer: 'national' }
+        };
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initStorage();
+            loadLastInput();
+            renderHistory();
+            initKeyboard();
+            
+            document.querySelectorAll('input, select').forEach(el => {
+                el.addEventListener('change', saveCurrentInput);
+                el.addEventListener('focus', function() {
+                    currentFocus = this;
+                });
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    calculateAll();
+                }
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    saveScheme();
+                }
+            });
+
+            document.addEventListener('paste', function(e) {
+                if (currentFocus && currentFocus.classList.contains('amount-display')) {
+                    e.preventDefault();
+                    let pasted = (e.clipboardData || window.clipboardData).getData('text');
+                    pasted = pasted.replace(/[^\d.]/g, '');
+                    if (pasted && !isNaN(parseFloat(pasted))) {
+                        currentFocus.value = pasted;
+                        formatAmount(currentFocus);
+                    }
+                }
+            });
+
+            document.getElementById('caseType').addEventListener('change', updateProjectNameHint);
+            updateProjectNameHint();
+        });
+
+        // 浮动费率显示更新
+        function updateFloatRateDisplay() {
+            let val = document.getElementById('lawyerFloatRate').value;
+            document.getElementById('floatRateDisplay').textContent = val + 'x';
+        }
+
+        // 获取项目名称（智能fallback）
+        function getProjectName() {
+            let name = document.getElementById('projectName').value.trim();
+            if (!name) {
+                let caseType = getCaseTypeText(document.getElementById('caseType').value) || '案件';
+                let subject = document.getElementById('subjectAmount').value || '0';
+                let subjectNum = parseFloat(subject.replace(/,/g, '')) || 0;
+                let subjectShort = subjectNum > 0 ? `（标的${(subjectNum/10000).toFixed(2)}万）` : '';
+                return caseType + subjectShort;
+            }
+            return name;
+        }
+
+        function updateProjectNameHint() {
+            let name = document.getElementById('projectName').value.trim();
+            let hint = document.getElementById('projectNameHint');
+            let autoDisplay = document.getElementById('autoTitleDisplay');
+            
+            if (!name) {
+                let defaultName = getCaseTypeText(document.getElementById('caseType').value);
+                hint.textContent = '将自动使用：' + defaultName;
+                hint.style.display = 'inline-block';
+                hint.className = 'text-xs text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full';
+                autoDisplay.textContent = '默认：' + defaultName;
+            } else {
+                hint.textContent = '已自定义';
+                hint.className = 'text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full';
+                autoDisplay.textContent = '当前：' + name;
+            }
+        }
+
+        function formatAmount(input) {
+            let value = input.value.replace(/[^\d.]/g, '');
+            let parts = value.split('.');
+            if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join('');
+            
+            if (value) {
+                let num = parseFloat(value);
+                if (!isNaN(num)) {
+                    input.value = num.toLocaleString('zh-CN');
+                    if (input.id === 'subjectAmount') {
+                        document.getElementById('amountChinese').textContent = numberToChinese(num);
+                        updateProjectNameHint();
+                    }
+                }
+            }
+            debounceCalculation();
+        }
+
+        let debounceTimer;
+        function debounceCalculation() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                if (document.getElementById('subjectAmount').value) {
+                    calculateAll();
+                }
+            }, 500);
+        }
+
+        function updateCalculation() {
+            debounceCalculation();
+        }
+
+        function numberToChinese(num) {
+            if (num === 0 || isNaN(num)) return '零元整';
+            const units = ['', '拾', '佰', '仟', '万', '拾', '佰', '仟', '亿', '拾', '佰', '仟'];
+            const nums = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'];
+            
+            let str = '';
+            let integer = Math.floor(num);
+            let decimal = Math.round((num - integer) * 100);
+            
+            let intStr = integer.toString();
+            let zero = false;
+            for (let i = 0; i < intStr.length; i++) {
+                let n = parseInt(intStr[i]);
+                let pos = intStr.length - i - 1;
+                if (n === 0) {
+                    if (!zero && pos % 4 === 0 && pos !== 0) {
+                        str += units[pos];
+                        zero = true;
+                    }
+                } else {
+                    if (zero) {
+                        str += '零';
+                        zero = false;
+                    }
+                    str += nums[n] + units[pos];
+                }
+            }
+            str += '元';
+            
+            if (decimal === 0) {
+                str += '整';
+            } else {
+                let jiao = Math.floor(decimal / 10);
+                let fen = decimal % 10;
+                if (jiao > 0) str += nums[jiao] + '角';
+                if (fen > 0) str += nums[fen] + '分';
+            }
+            return str;
+        }
+
+        function reverseCalculate(input) {
+            let fee = parseFloat(input.value.replace(/,/g, ''));
+            if (!fee || fee <= 0) return;
+            
+            let std = litigationStandards.national.property;
+            let amount = 0;
+            
+            for (let seg of std) {
+                let segMaxFee = seg.limit === Infinity ? Infinity : (seg.limit * seg.rate + seg.base);
+                if (fee <= segMaxFee || seg.limit === Infinity) {
+                    amount = seg.rate > 0 ? (fee - seg.base) / seg.rate : fee * 200;
+                    break;
+                }
+            }
+            
+            if (amount > 0) {
+                document.getElementById('subjectAmount').value = amount.toLocaleString('zh-CN');
+                document.getElementById('amountChinese').textContent = numberToChinese(amount);
+                updateProjectNameHint();
+                debounceCalculation();
+            }
+        }
+
+        function updateProvinceDisplay() {
+            let prov = document.getElementById('province').value;
+            let std = litigationStandards[prov] || litigationStandards.national;
+            document.getElementById('provinceBadge').textContent = std.name;
+            let lawText = '依据：' + std.law;
+            if (std.property === 'national' && prov !== 'national') {
+                lawText += '（诉讼费参照国家标准）';
+            }
+            document.getElementById('provinceLaw').innerHTML = '<span class="font-bold text-indigo-600">依据：</span>' + lawText;
+        }
+
+        function toggleFeeType(type, card) {
+            let checkbox = document.getElementById('enable' + type.charAt(0).toUpperCase() + type.slice(1));
+            checkbox.checked = !checkbox.checked;
+            card.classList.toggle('active', checkbox.checked);
+            debounceCalculation();
+        }
+
+        function setTravelMode(mode) {
+            travelMode = mode;
+            document.getElementById('travelDetailMode').classList.toggle('hidden', mode !== 'detail');
+            document.getElementById('travelLumpMode').classList.toggle('hidden', mode !== 'lump');
+            
+            const detailBtn = document.getElementById('travelDetailBtn');
+            const lumpBtn = document.getElementById('travelLumpBtn');
+            
+            if (mode === 'detail') {
+                detailBtn.className = 'flex-1 py-2 rounded-md text-sm font-medium transition shadow-sm bg-white text-indigo-600';
+                lumpBtn.className = 'flex-1 py-2 rounded-md text-sm font-medium transition text-slate-600 hover:text-slate-800';
+            } else {
+                detailBtn.className = 'flex-1 py-2 rounded-md text-sm font-medium transition text-slate-600 hover:text-slate-800';
+                lumpBtn.className = 'flex-1 py-2 rounded-md text-sm font-medium transition shadow-sm bg-white text-indigo-600';
+            }
+            debounceCalculation();
+        }
+
+        function useSubjectAmount() {
+            let subject = document.getElementById('subjectAmount').value;
+            document.getElementById('preserveAmount').value = subject;
+            debounceCalculation();
+        }
+
+        function setInsuranceRate(rate) {
+            document.getElementById('insuranceRate').value = rate;
+            debounceCalculation();
+        }
+
+        // 核心计算
+        function calculateAll() {
+            let subject = parseFloat(document.getElementById('subjectAmount').value.replace(/,/g, '')) || 0;
+            let province = document.getElementById('province').value;
+            let caseType = document.getElementById('caseType').value;
+            let stage = document.getElementById('caseStage').value;
+            
+            let result = {
+                subject: subject,
+                items: [],
+                total: 0,
+                warning: null
+            };
+
+            // 诉讼费
+            if (document.getElementById('enableLitigation').checked) {
+                let fee = calculateLitigation(subject, caseType, stage, province);
+                result.items.push({
+                    name: '诉讼费/仲裁费',
+                    desc: getStageText(stage) + ' · ' + getCaseTypeText(caseType),
+                    amount: fee,
+                    waived: false,
+                    warning: fee > subject * 0.1 ? '诉讼费占标的额比例较高，建议评估诉讼成本效益' : null
+                });
+                if (fee > 0) result.total += fee;
+            }
+
+            // 律师费（含浮动费率）
+            if (document.getElementById('enableLawyer').checked) {
+                let method = document.getElementById('lawyerMethod').value;
+                
+                if (method === 'ratio') {
+                    let baseFee = calculateLawyerFee(subject, province);
+                    let floatRate = parseFloat(document.getElementById('lawyerFloatRate').value) || 1;
+                    let waived = document.getElementById('lawyerWaived').checked;
+                    let finalFee = baseFee * floatRate;
+                    
+                    let desc = '按标的额比例收费';
+                    if (floatRate !== 1) desc += ` · 浮动${floatRate}x`;
+                    if (waived) desc += ' · [法务处理已减免]';
+                    
+                    result.items.push({
+                        name: '律师费',
+                        desc: desc,
+                        amount: finalFee,
+                        originalAmount: baseFee,
+                        waived: waived,
+                        note: waived ? '已减免不计总费' : (floatRate !== 1 ? `基准${baseFee.toLocaleString()}×${floatRate}` : '')
+                    });
+                    if (!waived) result.total += finalFee;
+                } else if (method === 'hourly') {
+                    let rate = parseFloat(document.getElementById('hourlyRate').value) || 2000;
+                    let hours = parseFloat(document.getElementById('hourlyHours').value) || 10;
+                    let fee = rate * hours;
+                    result.items.push({
+                        name: '律师费',
+                        desc: `计时收费 · ${rate}元/时 × ${hours}小时`,
+                        amount: fee,
+                        waived: false
+                    });
+                    result.total += fee;
+                } else {
+                    let fee = subject * 0.03;
+                    result.items.push({
+                        name: '律师费（风险代理）',
+                        desc: '风险代理前期费用（后期按回款比例另行结算）',
+                        amount: fee,
+                        waived: false
+                    });
+                    result.total += fee;
+                }
+            }
+
+            // 保全保险费
+            if (document.getElementById('enableInsurance').checked) {
+                let preserve = document.getElementById('preserveAmount').value.replace(/,/g, '');
+                let preserveAmount = parseFloat(preserve) || subject;
+                let rate = parseFloat(document.getElementById('insuranceRate').value) || 0.003;
+                let fee = preserveAmount * rate;
+                if (fee < 500 && fee > 0) fee = 500;
+                
+                result.items.push({
+                    name: '保全保险费',
+                    desc: `保全金额${preserveAmount.toLocaleString()}元 · 费率${(rate*1000).toFixed(1)}‰`,
+                    amount: fee,
+                    waived: false
+                });
+                result.total += fee;
+            }
+
+            // 差旅费
+            if (document.getElementById('enableTravel').checked) {
+                let fee = 0, desc = '';
+                if (travelMode === 'detail') {
+                    let traffic = parseFloat(document.getElementById('travelTraffic').value) || 0;
+                    let hotel = parseFloat(document.getElementById('travelHotel').value) || 0;
+                    let meal = parseFloat(document.getElementById('travelMeal').value) || 0;
+                    let other = parseFloat(document.getElementById('travelOther').value) || 0;
+                    fee = traffic + hotel + meal + other;
+                    desc = `交通${traffic}+住宿${hotel}+餐补${meal}+其它${other}`;
+                } else {
+                    fee = parseFloat(document.getElementById('travelLumpSum').value) || 0;
+                    desc = '包干总价';
+                }
+                result.items.push({
+                    name: '差旅费',
+                    desc: desc,
+                    amount: fee,
+                    waived: false
+                });
+                result.total += fee;
+            }
+
+            displayResult(result);
+            addToHistory(result);
+            return result;
+        }
+
+        function calculateLitigation(amount, type, stage, province) {
+            let std = litigationStandards[province] || litigationStandards.national;
+            let fee = 0;
+            
+            if (type === 'property' || type === 'execution') {
+                let brackets = std.property === 'national' ? litigationStandards.national.property : std.property;
+                for (let seg of brackets) {
+                    if (amount <= seg.limit || seg.limit === Infinity) {
+                        fee = amount * seg.rate + seg.base;
+                        break;
+                    }
+                }
+                if (type === 'execution' && amount <= 10000) {
+                    fee = Math.min(Math.max(amount * 0.015, 50), 500);
+                }
+            } else {
+                fee = 1000;
+            }
+            
+            let multiplier = { 'first': 1, 'second': 1, 'first+second': 2, 'all': 2.5, 'arbitration': 1.5 }[stage] || 1;
+            return Math.max(fee * multiplier, 0);
+        }
+
+        function calculateLawyerFee(amount, province) {
+            let std = litigationStandards[province];
+            let brackets = (std && std.lawyer && std.lawyer.ratio) ? std.lawyer.ratio : litigationStandards.national.lawyer.ratio;
+            
+            let fee = 0, remaining = amount, prevLimit = 0;
+            for (let seg of brackets) {
+                let segAmount = Math.min(remaining, seg.limit - prevLimit);
+                if (segAmount > 0) {
+                    fee += segAmount * seg.rate;
+                    remaining -= segAmount;
+                    prevLimit = seg.limit;
+                }
+                if (remaining <= 0) break;
+            }
+            return Math.max(fee, brackets[0].min || 3000);
+        }
+
+        function getStageText(stage) {
+            const map = { 'first': '一审', 'second': '二审', 'first+second': '一审+二审', 'all': '一审+二审+执行', 'arbitration': '仲裁' };
+            return map[stage] || stage;
+        }
+
+        function getCaseTypeText(type) {
+            const map = { 'property': '财产案件', 'non-property': '非财产案件', 'execution': '执行案件' };
+            return map[type] || '案件';
+        }
+
+        function displayResult(result) {
+            document.getElementById('totalFee').textContent = '¥' + result.total.toLocaleString('zh-CN', { minimumFractionDigits: 2 });
+            document.getElementById('totalFeeChinese').textContent = numberToChinese(result.total);
+            
+            result.items.forEach(item => {
+                let id = item.name.includes('诉讼') ? 'litigationPreview' : 
+                         item.name.includes('律师') ? 'lawyerPreview' : 
+                         item.name.includes('保全') ? 'insurancePreview' : 
+                         item.name.includes('差旅') ? 'travelPreview' : '';
+                if (id) document.getElementById(id).textContent = '¥' + Math.floor(item.amount).toLocaleString();
+            });
+
+            let warningItem = result.items.find(i => i.warning);
+            if (warningItem) {
+                document.getElementById('warningArea').classList.remove('hidden');
+                document.getElementById('warningText').textContent = warningItem.warning;
+            } else {
+                document.getElementById('warningArea').classList.add('hidden');
+            }
+
+            document.getElementById('feeRange').textContent = 
+                `¥${(result.total*0.8).toLocaleString()} - ¥${(result.total*1.2).toLocaleString()}`;
+
+            updateChart(result.items);
+            updateDetailList(result);
+            updatePrintTable(result);
+            
+            let proj = getProjectName();
+            document.getElementById('resultSubtitle').textContent = 
+                `${proj} | 标的¥${result.subject.toLocaleString()} | ${new Date().toLocaleString('zh-CN')}`;
+        }
+
+        function updateChart(items) {
+            const ctx = document.getElementById('feeChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: items.map(i => i.name + (i.waived ? '(减免)' : '')),
+                    datasets: [{
+                        data: items.map(i => i.amount),
+                        backgroundColor: ['#667eea', '#764ba2', '#10b981', '#f59e0b'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 15, font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        function updateDetailList(result) {
+            document.getElementById('detailList').innerHTML = result.items.map(item => {
+                let waivedClass = item.waived ? 'line-through text-slate-400 bg-green-50/30' : '';
+                let waivedTag = item.waived ? '<span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-bold">已减免</span>' : '';
+                return `
+                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg ${waivedClass} border border-slate-100">
+                        <div class="flex-1">
+                            <div class="font-medium text-slate-800 flex items-center flex-wrap gap-1">
+                                ${item.name}${waivedTag}
+                            </div>
+                            <div class="text-xs text-slate-500 mt-1">${item.desc}${item.note ? ' · ' + item.note : ''}</div>
+                        </div>
+                        <div class="text-right ml-4">
+                            <div class="font-bold text-slate-800 ${item.waived ? 'line-through' : ''}">¥${item.amount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</div>
+                            ${item.originalAmount ? `<div class="text-xs text-slate-400 line-through">基准¥${item.originalAmount.toLocaleString()}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updatePrintTable(result) {
+            document.getElementById('printTableBody').innerHTML = result.items.map(item => `
+                <tr class="border-b border-slate-200 hover:bg-slate-50">
+                    <td class="py-3 px-2 font-medium">${item.name}${item.waived ? '（已减免）' : ''}</td>
+                    <td class="py-3 px-2 text-right text-xs text-slate-600">${item.desc}</td>
+                    <td class="py-3 px-2 text-right font-mono font-bold ${item.waived ? 'line-through text-slate-400' : ''}">¥${item.amount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}</td>
+                    <td class="py-3 px-2 text-right text-xs">${item.note || ''}</td>
+                </tr>
+            `).join('');
+            document.getElementById('printTotal').textContent = '¥' + result.total.toLocaleString('zh-CN', {minimumFractionDigits: 2});
+            document.getElementById('printTime').textContent = new Date().toLocaleString('zh-CN');
+            document.getElementById('printStandard').textContent = document.getElementById('province').options[document.getElementById('province').selectedIndex].text;
+        }
+
+        function switchView(view) {
+            ['chart', 'list', 'compare'].forEach(v => {
+                document.getElementById(v + 'View').classList.add('hidden');
+                document.getElementById('tab' + v.charAt(0).toUpperCase() + v.slice(1)).classList.remove('active');
+            });
+            document.getElementById(view + 'View').classList.remove('hidden');
+            document.getElementById('tab' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('active');
+            if (view === 'compare') renderCompareView();
+        }
+
+        // 历史记录（有序号时间戳）
+        function addToHistory(result) {
+            let entry = {
+                id: Date.now(),
+                time: new Date().toLocaleString('zh-CN'),
+                subject: result.subject,
+                total: result.total,
+                type: getCaseTypeText(document.getElementById('caseType').value),
+                projectName: getProjectName(),
+                snapshot: getAllInputs()
+            };
+            
+            historyData.unshift(entry);
+            if (historyData.length > 10) historyData.pop();
+            safeStorage('set', { key: 'legalCalcHistory', value: historyData });
+            renderHistory();
+        }
+
+        function renderHistory() {
+            let container = document.getElementById('historyList');
+            if (historyData.length === 0) {
+                container.innerHTML = '<div class="text-sm text-slate-400 text-center py-8 bg-slate-50 rounded-lg">暂无历史记录</div>';
+                return;
+            }
+            
+            container.innerHTML = historyData.map((h, idx) => `
+                <div class="history-item p-3 bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all" onclick="loadHistory(${idx})">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="serial-number">${idx + 1}</span>
+                            <span class="font-bold text-slate-700 text-sm truncate max-w-[120px]">${h.projectName}</span>
+                        </div>
+                        <span class="text-xs text-slate-400 font-mono bg-slate-100 px-2 py-1 rounded">${h.time}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm pl-7">
+                        <span class="text-slate-500">${h.type} · 标的¥${h.subject.toLocaleString()}</span>
+                        <span class="font-bold text-indigo-600">费用¥${h.total.toLocaleString()}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadHistory(idx) {
+            let h = historyData[idx];
+            if (h && h.snapshot) {
+                let s = h.snapshot;
+                document.getElementById('projectName').value = s.projectName || '';
+                document.getElementById('subjectAmount').value = s.subjectAmount || '';
+                document.getElementById('caseType').value = s.caseType || 'property';
+                document.getElementById('caseStage').value = s.caseStage || 'first';
+                document.getElementById('province').value = s.province || 'national';
+                updateProvinceDisplay();
+                updateProjectNameHint();
+                calculateAll();
+                alert(`已恢复历史记录 #${idx + 1}：${h.projectName}`);
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('确定清空所有历史记录？')) {
+                historyData = [];
+                safeStorage('remove', 'legalCalcHistory');
+                renderHistory();
+            }
+        }
+
+        // 方案保存与对比
+        function saveScheme() {
+            let result = calculateAll();
+            let scheme = {
+                id: Date.now(),
+                name: getProjectName(),
+                date: new Date().toLocaleString('zh-CN'),
+                data: result,
+                inputs: getAllInputs()
+            };
+            
+            savedSchemes.push(scheme);
+            if (savedSchemes.length > 5) savedSchemes.shift();
+            safeStorage('set', { key: 'legalCalcSchemes', value: savedSchemes });
+            
+            let isCustom = document.getElementById('projectName').value.trim() !== '';
+            alert(`方案"${scheme.name}"已保存！${isCustom ? '' : '\n（注：未填写项目名称，已自动使用案型类型）'}`);
+            renderCompareView();
+        }
+
+        function getAllInputs() {
+            return {
+                projectName: document.getElementById('projectName').value,
+                subjectAmount: document.getElementById('subjectAmount').value,
+                caseType: document.getElementById('caseType').value,
+                caseStage: document.getElementById('caseStage').value,
+                province: document.getElementById('province').value,
+                travelMode: travelMode,
+                lawyerMethod: document.getElementById('lawyerMethod').value,
+                lawyerFloatRate: document.getElementById('lawyerFloatRate').value,
+                lawyerWaived: document.getElementById('lawyerWaived').checked
+            };
+        }
+
+        function renderCompareView() {
+            let container = document.getElementById('compareList');
+            if (savedSchemes.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-400 py-8 bg-slate-50 rounded-lg">暂无保存的方案</div>';
+                return;
+            }
+            
+            container.innerHTML = savedSchemes.map((scheme, idx) => `
+                <div class="border border-slate-200 rounded-xl p-4 bg-white shadow-sm">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <div class="font-bold text-slate-800 text-lg">${scheme.name}</div>
+                            <div class="text-xs text-slate-500 mt-1">${scheme.date}</div>
+                        </div>
+                        <button onclick="deleteScheme(${idx})" class="text-red-500 hover:text-red-700 text-xs px-2 py-1 rounded hover:bg-red-50 transition">删除</button>
+                    </div>
+                    <div class="space-y-2 text-sm mb-4">
+                        ${scheme.data.items.map(item => `
+                            <div class="flex justify-between items-center py-1 border-b border-slate-50 last:border-0">
+                                <span class="text-slate-600">${item.name}</span>
+                                <span class="${item.waived ? 'line-through text-slate-400' : 'font-bold font-mono'}">¥${item.amount.toLocaleString()}</span>
+                            </div>
+                        `).join('')}
+                        <div class="flex justify-between items-center pt-2 border-t-2 border-slate-200 font-bold text-indigo-600 text-lg">
+                            <span>总计</span>
+                            <span>¥${scheme.data.total.toLocaleString()}</span>
+                        </div>
+                    </div>
+                    <button onclick="loadScheme(${idx})" class="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg text-sm font-bold transition">加载此方案</button>
+                </div>
+            `).join('');
+        }
+
+        function loadScheme(idx) {
+            let scheme = savedSchemes[idx];
+            if (!scheme || !scheme.inputs) return;
+            
+            let s = scheme.inputs;
+            document.getElementById('projectName').value = s.projectName || '';
+            document.getElementById('subjectAmount').value = s.subjectAmount || '';
+            document.getElementById('caseType').value = s.caseType || 'property';
+            document.getElementById('caseStage').value = s.caseStage || 'first';
+            document.getElementById('province').value = s.province || 'national';
+            if (s.travelMode) setTravelMode(s.travelMode);
+            if (s.lawyerMethod) document.getElementById('lawyerMethod').value = s.lawyerMethod;
+            if (s.lawyerFloatRate) {
+                document.getElementById('lawyerFloatRate').value = s.lawyerFloatRate;
+                updateFloatRateDisplay();
+            }
+            if (s.lawyerWaived !== undefined) document.getElementById('lawyerWaived').checked = s.lawyerWaived;
+            
+            updateProvinceDisplay();
+            updateProjectNameHint();
+            calculateAll();
+            switchView('chart');
+        }
+
+        function deleteScheme(idx) {
+            if (confirm('确定删除此方案？')) {
+                savedSchemes.splice(idx, 1);
+                safeStorage('set', { key: 'legalCalcSchemes', value: savedSchemes });
+                renderCompareView();
+            }
+        }
+
+        // 导出功能
+        function toggleExportMenu() {
+            document.getElementById('exportMenu').classList.toggle('show');
+        }
+
+        function exportReport(format) {
+            document.getElementById('exportMenu').classList.remove('show');
+            
+            let project = getProjectName();
+            let subject = document.getElementById('subjectAmount').value || '0';
+            let timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            let safeProject = project.replace(/[\\/:*?"<>|\u0000-\u001F\u007F-\u009F\u{1F600}-\u{1F6FF}]/gu, '_').substring(0, 50).trim() || '未命名案件';
+            let filename = `${safeProject}_律师费诉讼费计算报告_标的${subject}_${timestamp}_V2.1.0`;
+            
+            switch(format) {
+                case 'copy': copyAsText(); break;
+                case 'txt': downloadAsText(filename); break;
+                case 'md': downloadAsMarkdown(filename); break;
+                case 'png': downloadAsImage(filename, 'png'); break;
+                case 'jpg': downloadAsImage(filename, 'jpg'); break;
+                case 'pdf': downloadAsPDF(filename); break;
+                case 'word': downloadAsWord(filename); break;
+                case 'excel': downloadAsExcel(filename); break;
+                case 'csv': downloadAsCSV(filename); break;
+            }
+        }
+
+        function getReportText() {
+            let result = calculateAll();
+            let projectTitle = getProjectName();
+            let isAutoNamed = !document.getElementById('projectName').value.trim();
+            
+            let text = `法律费用计算报告\n`;
+            text += `=================================================================\n\n`;
+            text += `项目名称：${projectTitle}${isAutoNamed ? '（系统自动命名）' : ''}\n`;
+            text += `当事人：${document.getElementById('partyName').value || '-'}\n`;
+            text += `经办人：${document.getElementById('handlerName').value || '-'}\n`;
+            text += `标的金额：¥${result.subject.toLocaleString()}（${numberToChinese(result.subject)}）\n`;
+            text += `案件类型：${getCaseTypeText(document.getElementById('caseType').value)}\n`;
+            text += `诉讼阶段：${getStageText(document.getElementById('caseStage').value)}\n`;
+            text += `适用标准：${document.getElementById('province').options[document.getElementById('province').selectedIndex].text}\n`;
+            text += `生成时间：${new Date().toLocaleString('zh-CN')}\n\n`;
+            text += `费用明细：\n`;
+            text += `-----------------------------------------------------------------\n`;
+            
+            result.items.forEach((item, idx) => {
+                text += `${idx + 1}. ${item.name}${item.waived ? ' [已减免]' : ''}\n`;
+                text += `   金额：¥${item.amount.toLocaleString('zh-CN', {minimumFractionDigits: 2})}\n`;
+                text += `   计算：${item.desc}\n`;
+                if (item.note) text += `   备注：${item.note}\n`;
+                text += `\n`;
+            });
+            
+            text += `-----------------------------------------------------------------\n`;
+            text += `总计费用：¥${result.total.toLocaleString('zh-CN', {minimumFractionDigits: 2})}（${numberToChinese(result.total)}）\n`;
+            text += `费用区间：¥${(result.total*0.8).toLocaleString()} - ¥${(result.total*1.2).toLocaleString()}\n\n`;
+            text += `=================================================================\n`;
+            text += `Generated by AiLTK V2.1.0 | https://asktai.github.io/AiLTK/\n`;
+            text += `开源项目：https://github.com/asktai/AiLTK`;
+            return text;
+        }
+
+        function copyAsText() {
+            navigator.clipboard.writeText(getReportText()).then(() => alert('报告已复制到剪贴板')).catch(() => alert('复制失败'));
+        }
+
+        function downloadAsText(filename) {
+            let blob = new Blob([getReportText()], { type: 'text/plain;charset=utf-8' });
+            downloadBlob(blob, filename + '.txt');
+        }
+
+        function downloadAsMarkdown(filename) {
+            let text = getReportText().replace(/\n/g, '\n\n').replace(/={8,}/g, '---');
+            let blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+            downloadBlob(blob, filename + '.md');
+        }
+
+        async function downloadAsImage(filename, format) {
+            try {
+                let element = document.getElementById('resultPanel');
+                let canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+                let link = document.createElement('a');
+                link.download = filename + '.' + format;
+                link.href = canvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', 0.9);
+                link.click();
+            } catch (e) {
+                alert('图片生成失败：' + e.message);
+            }
+        }
+
+        function downloadAsPDF(filename) {
+            try {
+                let element = document.getElementById('resultPanel');
+                html2canvas(element, { scale: 2 }).then(canvas => {
+                    const { jsPDF } = window.jspdf;
+                    let doc = new jsPDF();
+                    let imgData = canvas.toDataURL('image/png');
+                    let imgWidth = 190;
+                    let imgHeight = canvas.height * imgWidth / canvas.width;
+                    doc.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                    doc.save(filename + '.pdf');
+                });
+            } catch (e) {
+                alert('PDF生成失败：' + e.message);
+            }
+        }
+
+        function downloadAsWord(filename) {
+            let html = `<html><head><meta charset='utf-8'><title>费用报告</title></head><body><pre>${getReportText().replace(/\n/g, '<br>')}</pre></body></html>`;
+            let blob = new Blob(['\ufeff', html], { type: 'application/msword;charset=utf-8' });
+            downloadBlob(blob, filename + '.doc');
+        }
+
+        function downloadAsExcel(filename) {
+            let result = calculateAll();
+            let data = [
+                ['费用项目', '计算依据', '金额（元）', '备注'],
+                ...result.items.map(i => [i.name, i.desc, i.amount, i.waived ? '已减免' : '']),
+                ['', '', '', ''],
+                ['标的金额', '', result.subject, ''],
+                ['总计费用', '', result.total, '']
+            ];
+            let ws = XLSX.utils.aoa_to_sheet(data);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "费用计算");
+            XLSX.writeFile(wb, filename + '.xlsx');
+        }
+
+        function downloadAsCSV(filename) {
+            let result = calculateAll();
+            let csv = '\uFEFF费用项目,计算依据,金额,备注\n';
+            result.items.forEach(i => {
+                csv += `"${i.name}","${i.desc}",${i.amount},"${i.waived ? '已减免' : ''}"\n`;
+            });
+            csv += `\n标的金额,,${result.subject},\n`;
+            csv += `总计费用,,${result.total},\n`;
+            let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            downloadBlob(blob, filename + '.csv');
+        }
+
+        function downloadBlob(blob, filename) {
+            let link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+        }
+
+        // 虚拟键盘（支持鼠标和触摸）
+        function initKeyboard() {
+            let handle = document.getElementById('keyboardHandle');
+            handle.addEventListener('mousedown', startDrag);
+            handle.addEventListener('touchstart', handleTouchStart, { passive: false });
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchend', endDrag);
+        }
+
+        function startDrag(e) {
+            if (e.target.closest('button')) return;
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+            isDragging = true;
+        }
+
+        function handleTouchStart(e) {
+            if (e.target.closest('button')) return;
+            let touch = e.touches[0];
+            initialX = touch.clientX - xOffset;
+            initialY = touch.clientY - yOffset;
+            isDragging = true;
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+            xOffset = currentX;
+            yOffset = currentY;
+            document.getElementById('virtualKeyboard').style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+        }
+
+        function handleTouchMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            let touch = e.touches[0];
+            currentX = touch.clientX - initialX;
+            currentY = touch.clientY - initialY;
+            xOffset = currentX;
+            yOffset = currentY;
+            document.getElementById('virtualKeyboard').style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+        }
+
+        function endDrag() {
+            isDragging = false;
+        }
+
+        function inputKey(key) {
+            if (!currentFocus) return;
+            
+            if (key === 'Enter') {
+                calculateAll();
+                return;
+            }
+            if (key === 'Clear') {
+                currentFocus.value = '';
+            } else if (key === 'Backspace') {
+                currentFocus.value = currentFocus.value.slice(0, -1);
+            } else {
+                currentFocus.value += key;
+            }
+            
+            if (currentFocus.classList.contains('amount-display')) {
+                formatAmount(currentFocus);
+            } else {
+                debounceCalculation();
+            }
+            currentFocus.focus();
+        }
+
+        function toggleKeyboardCollapse() {
+            document.getElementById('virtualKeyboard').classList.toggle('collapsed');
+        }
+
+        function closeKeyboard() {
+            document.getElementById('virtualKeyboard').style.display = 'none';
+        }
+
+        function saveCurrentInput() {
+            safeStorage('set', { key: 'legalCalcLastInput', value: getAllInputs() });
+        }
+
+        function loadLastInput() {
+            let last = safeStorage('get', 'legalCalcLastInput');
+            if (!last || !last[0]) return;
+            
+            try {
+                let s = last[0];
+                document.getElementById('projectName').value = s.projectName || '';
+                document.getElementById('subjectAmount').value = s.subjectAmount || '';
+                document.getElementById('caseType').value = s.caseType || 'property';
+                document.getElementById('caseStage').value = s.caseStage || 'first';
+                document.getElementById('province').value = s.province || 'national';
+                if (s.travelMode) travelMode = s.travelMode;
+                if (s.lawyerMethod) document.getElementById('lawyerMethod').value = s.lawyerMethod;
+                if (s.lawyerFloatRate) {
+                    document.getElementById('lawyerFloatRate').value = s.lawyerFloatRate;
+                    updateFloatRateDisplay();
+                }
+                if (s.lawyerWaived !== undefined) document.getElementById('lawyerWaived').checked = s.lawyerWaived;
+                updateProvinceDisplay();
+            } catch(e) { console.error('加载失败', e); }
+        }
+
+        function resetAll() {
+            if (!confirm('确定要清空所有输入吗？')) return;
+            
+            ['projectName', 'partyName', 'handlerName', 'subjectAmount', 'reverseFee'].forEach(id => {
+                let el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            
+            ['travelTraffic', 'travelHotel', 'travelMeal', 'travelOther', 'travelLumpSum', 'preserveAmount'].forEach(id => {
+                let el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            
+            document.getElementById('amountChinese').textContent = '';
+            document.getElementById('caseType').value = 'property';
+            document.getElementById('caseStage').value = 'first';
+            document.getElementById('province').value = 'national';
+            document.getElementById('lawyerFloatRate').value = '1';
+            document.getElementById('lawyerWaived').checked = false;
+            document.getElementById('insuranceRate').value = '0.003';
+            updateFloatRateDisplay();
+            
+            ['Litigation', 'Lawyer', 'Insurance', 'Travel'].forEach(type => {
+                let cb = document.getElementById('enable' + type);
+                if (cb) {
+                    cb.checked = true;
+                    let card = cb.closest('.fee-card');
+                    if (card) card.classList.add('active');
+                }
+            });
+            
+            setTravelMode('detail');
+            updateProvinceDisplay();
+            updateProjectNameHint();
+            
+            document.getElementById('totalFee').textContent = '¥0.00';
+            document.getElementById('totalFeeChinese').textContent = '零元整';
+            ['litigation', 'lawyer', 'insurance', 'travel'].forEach(id => {
+                let el = document.getElementById(id + 'Preview');
+                if (el) el.textContent = '¥0';
+            });
+            
+            if (chartInstance) {
+                chartInstance.destroy();
+                chartInstance = null;
+            }
+            document.getElementById('detailList').innerHTML = '';
+            safeStorage('remove', 'legalCalcLastInput');
+        }
+
+        function showReserved(num) {
+            alert(`预留位置 ${num}\n\n此功能正在开发中，敬请期待！`);
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.relative')) {
+                document.getElementById('exportMenu').classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
