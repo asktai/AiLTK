@@ -6,8 +6,8 @@
     <meta name="description" content="诉讼费计算器专业增强版 - 企业诉讼费用成本预算分析系统，支持诉讼费、律师费、保全费、执行费等全功能计算">
     <meta name="keywords" content="诉讼费计算器,律师费计算,诉讼成本,保全费,执行费,法务工具">
     <meta name="author" content="胡皓">
-    <!-- 版本号更新为 V1.1.2 -->
-    <meta name="version" content="V1.1.2">
+    <!-- 版本号更新为 V1.2.1 -->
+    <meta name="version" content="V1.2.1">
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%234f46e5' width='180' height='180' rx='40'/><text x='90' y='130' text-anchor='middle' font-size='120'>⚖️</text></svg>">
@@ -21,10 +21,10 @@
     <style>
         /* 
         =====================================================
-        版本：V1.1.2_自由切换优化版
+        版本：V1.2.1_自由切换优化版
         作者：胡皓
         更新说明：
-        1. 版本号升级至V1.1.2
+        1. 版本号升级至V1.2.1
         2. 优化模式切换逻辑：首次输入密码解锁后，普通模式与专业模式可自由来回切换，无需重复输入密码
         3. 新增解锁状态记忆，提升用户体验
         4. 保持所有计算功能与导出功能完整
@@ -320,6 +320,7 @@
             }
         }
     </style>
+<base target="_blank">
 </head>
 <body class="text-gray-800">
 
@@ -374,8 +375,8 @@
                 
                 <div class="flex items-center space-x-2 md:space-x-4">
                     <!-- 单按钮模式切换 - 已解锁时可自由切换 -->
-                    <button onclick="toggleMode()" id="modeSwitchBtn" 
-                        class="mode-switch-btn px-3 md:px-4 py-2 rounded-lg text-sm font-medium bg-blue-100 text-blue-700 border border-blue-300 flex items-center gap-2 hover:bg-blue-200 transition shadow-sm">
+                    <button id="modeSwitchBtn" 
+                        class="mode-switch-btn px-3 md:px-4 py-2 rounded-lg text-sm font-medium bg-blue-100 text-blue-700 border border-blue-300 flex items-center gap-2 hover:bg-blue-200 transition shadow-sm cursor-pointer select-none">
                         <span id="modeIcon">⚡</span>
                         <span id="modeText" class="hidden sm:inline">普通模式</span>
                         <span id="modeTextShort" class="sm:hidden">普通</span>
@@ -385,7 +386,7 @@
                     </button>
                     
                     <!-- 版本号更新 -->
-                    <span id="versionBadge" class="text-xs font-mono text-gray-500 hidden md:block">V1.1.2</span>
+                    <span id="versionBadge" class="text-xs font-mono text-gray-500 hidden md:block">V1.2.0</span>
                 </div>
             </div>
         </div>
@@ -837,6 +838,10 @@
                                 ¥0
                             </div>
                             <div class="text-xs md:text-sm text-gray-600 mt-1 truncate" id="totalCostChinese"></div>
+                            <div class="text-xs md:text-sm font-medium mt-1">
+                                <span class="text-gray-500">成本占比：</span>
+                                <span id="costRatioDisplay" class="text-blue-600 font-bold">0.00%</span>
+                            </div>
                         </div>
                     </div>
 
@@ -986,7 +991,7 @@
                 <span class="inline-block mx-1 md:mx-2">作者：胡皓</span>
                 <a href="https://github.com/asktai/AiLTK" target="_blank" class="text-blue-400 hover:underline mx-1 md:mx-2">GitHub</a>
                 <!-- 版本号更新 -->
-                <span class="inline-block mx-1 md:mx-2">版本：<span id="footerVersion">V1.1.2</span></span>
+                <span class="inline-block mx-1 md:mx-2">版本：<span id="footerVersion">V1.2.0</span></span>
             </p>
         </div>
     </footer>
@@ -1032,7 +1037,41 @@
             updateLawyerFeeStandard();
             initKeyboardDrag();
             initSectionStates();
+
+            // 移动端兼容：为模式切换按钮同时绑定click和touchend事件
+            initModeSwitchButton();
         });
+
+        // 移动端事件绑定函数
+        function initModeSwitchButton() {
+            const btn = document.getElementById('modeSwitchBtn');
+            if (!btn) return;
+
+            // 移除原有onclick属性，改用addEventListener
+            btn.removeAttribute('onclick');
+
+            // 同时绑定click和touchend事件，确保移动端兼容性
+            btn.addEventListener('click', toggleMode, { passive: false });
+            btn.addEventListener('touchend', function(e) {
+                e.preventDefault(); // 阻止默认行为
+                e.stopPropagation(); // 阻止事件冒泡
+                toggleMode(e);
+            }, { passive: false });
+
+            // 添加触摸反馈效果
+            btn.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.95)';
+                this.style.opacity = '0.8';
+            }, { passive: true });
+
+            btn.addEventListener('touchend', function() {
+                this.style.transform = '';
+                this.style.opacity = '';
+            }, { passive: true });
+
+            // 防止300ms延迟
+            btn.style.touchAction = 'manipulation';
+        }
 
         // ==================== 虚拟键盘拖动支持 ====================
         function initKeyboardDrag() {
@@ -1127,7 +1166,19 @@
         }
 
         // ==================== 优化后的模式切换逻辑 ====================
-        function toggleMode() {
+        function toggleMode(e) {
+            // 防止事件穿透和重复触发
+            if (e && e.type === 'touchend') {
+                e.preventDefault();
+            }
+
+            // 防抖：如果300ms内已经触发过则忽略
+            const now = Date.now();
+            if (window._lastToggleTime && (now - window._lastToggleTime) < 300) {
+                return;
+            }
+            window._lastToggleTime = now;
+
             if (currentMode === 'normal') {
                 // 如果已解锁过，直接切换，无需再次输入密码
                 if (hasUnlockedPro) {
@@ -1346,6 +1397,21 @@
             updateDetailTable({ courtFee, lawyerFee: finalLawyerFee, preservationFee, insuranceFee, travelFee, announcementFee, evaluationFee, investigationFee, otherFee, cooperationSaving, total });
             
             document.getElementById('amountChinese').textContent = amount > 0 ? '大写：' + numberToChinese(amount) : '';
+
+            // 更新成本占比
+            const costRatio = amount > 0 ? ((data.total / amount) * 100).toFixed(2) : '0.00';
+            const ratioElement = document.getElementById('costRatioDisplay');
+            if (ratioElement) {
+                ratioElement.textContent = costRatio + '%';
+                // 根据占比设置颜色
+                if (parseFloat(costRatio) > 10) {
+                    ratioElement.className = 'text-red-600 font-bold';
+                } else if (parseFloat(costRatio) > 5) {
+                    ratioElement.className = 'text-orange-600 font-bold';
+                } else {
+                    ratioElement.className = 'text-blue-600 font-bold';
+                }
+            }
             document.getElementById('totalCostChinese').textContent = total > 0 ? numberToChinese(total) : '';
             
             return { amount, courtFee, lawyerFee: finalLawyerFee, additionalTotal, total };
@@ -1723,20 +1789,62 @@
             const projectName = document.getElementById('projectName').value || '纠纷案';
             const party = document.getElementById('partyName').value || '';
             const agent = document.getElementById('agentName').value || '';
-            const amount = document.getElementById('amountInput').value;
-            const amountChinese = numberToChinese(parseFloat(amount.replace(/,/g, '')) || 0);
+            const amount = document.getElementById('amountInput').value || '0';
+            const amountNum = parseFloat(amount.replace(/,/g, '')) || 0;
+            const amountChinese = numberToChinese(amountNum);
             const stage = document.getElementById('litigationStage').options[document.getElementById('litigationStage').selectedIndex].text;
-            
-            let text = `诉讼费用预算报告\n====================\n`;
-            text += `项目名称：${projectName}\n当事人：${party}\n经办人：${agent}\n`;
+            const caseType = document.getElementById('caseType').options[document.getElementById('caseType').selectedIndex].text;
+            const totalText = document.getElementById('totalCost').textContent.replace('¥', '').replace(/,/g, '');
+            const totalNum = parseFloat(totalText) || 0;
+            const costRatio = amountNum > 0 ? ((totalNum / amountNum) * 100).toFixed(2) : '0.00';
+
+            // 获取各项费用
+            const courtFee = document.getElementById('courtFeeDisplay').textContent.replace('¥', '').trim();
+            const lawyerFee = document.getElementById('lawyerFeeDisplay').textContent.replace('¥', '').trim();
+
+            // 专业模式费用项
+            let preservationFee = '0', insuranceFee = '0', travelFee = '0', 
+                announcementFee = '0', evaluationFee = '0', investigationFee = '0', otherFee = '0';
+
+            if (currentMode === 'professional') {
+                preservationFee = document.getElementById('preservationFeeDisplay').textContent.replace('¥', '').trim();
+                insuranceFee = document.getElementById('insuranceFeeDisplay').textContent.replace('¥', '').trim();
+                travelFee = (parseFloat(document.getElementById('travelFee').value) || 0).toLocaleString('zh-CN');
+                announcementFee = (parseFloat(document.getElementById('announcementFee').value) || 0).toLocaleString('zh-CN');
+                evaluationFee = (parseFloat(document.getElementById('evaluationFee').value) || 0).toLocaleString('zh-CN');
+                investigationFee = (parseFloat(document.getElementById('investigationFee').value) || 0).toLocaleString('zh-CN');
+                otherFee = (parseFloat(document.getElementById('otherFee').value) || 0).toLocaleString('zh-CN');
+            } else {
+                // 普通模式下从输入框读取或显示0
+                const addTotal = document.getElementById('additionalFeeDisplay').textContent.replace('¥', '').trim();
+                if (addTotal !== '0' && addTotal !== '') {
+                    otherFee = addTotal;
+                }
+            }
+
+            let text = `诉讼费用预算报告模板\n====================\n`;
+            text += `项目名称：${projectName}\n`;
+            text += `当事人：${party}\n`;
+            text += `经办人：${agent}\n`;
             text += `报告时间：${new Date().toLocaleString('zh-CN')}\n\n`;
-            text += `标的金额：¥${amount} (${amountChinese})\n诉讼阶段：${stage}\n`;
-            text += `费用明细：\n- 法院诉讼费：${document.getElementById('courtFeeDisplay').textContent}\n`;
-            text += `- 律师代理费：${document.getElementById('lawyerFeeDisplay').textContent}\n`;
-            text += `- 附加费用：${document.getElementById('additionalFeeDisplay').textContent}\n`;
-            text += `====================\n费用总计：${document.getElementById('totalCost').textContent}\n`;
+            text += `争议标的额：¥${amount} (${amountChinese})\n`;
+            text += `案件阶段：${stage}\n`;
+            text += `案件类型：${caseType}\n\n`;
+            text += `费用明细：\n`;
+            text += `- 法院诉讼费：¥${courtFee}\n`;
+            text += `- 律师代理费：¥${lawyerFee}\n`;
+            text += `- 法院保全费：¥${preservationFee}\n`;
+            text += `- 保全保险费：¥${insuranceFee}\n`;
+            text += `- 差旅费用：¥${travelFee}\n`;
+            text += `- 公证费用：¥${announcementFee}\n`;
+            text += `- 其它费用：¥${otherFee}\n`;
+            text += `====================\n`;
+            text += `费用总计：${document.getElementById('totalCost').textContent}\n`;
             text += `大写：${document.getElementById('totalCostChinese').textContent}\n`;
-            text += `***免责声明：本计算结果仅供参考，实际费用以相关机构实际收取为准。\nGenerated by 法务通`;
+            text += `成本占比：${costRatio}%\n\n`;
+            text += `*** 免责声明：本计算结果仅供参考，实际费用以相关机构实际收取为准。\n`;
+            text += `Generated by 法务通 | https://asktai.github.io/AiLTK/\n`;
+            text += `====================`;
             return text;
         }
 
@@ -1785,16 +1893,162 @@
         }
 
         function printPDF() {
-            document.getElementById('printProjectName').textContent = document.getElementById('projectName').value || '纠纷案';
-            document.getElementById('printParty').textContent = document.getElementById('partyName').value || '';
-            document.getElementById('printAgent').textContent = document.getElementById('agentName').value || '';
-            document.getElementById('printAmount').textContent = '¥' + document.getElementById('amountInput').value;
-            document.getElementById('printTime').textContent = new Date().toLocaleString('zh-CN');
-            
-            const printContent = document.getElementById('printContent');
-            printContent.innerHTML = '';
-            printContent.appendChild(document.querySelector('.lg\\\\:col-span-7').cloneNode(true));
-            window.print();
+            // 生成符合模板格式的打印内容
+            const projectName = document.getElementById('projectName').value || '纠纷案';
+            const party = document.getElementById('partyName').value || '';
+            const agent = document.getElementById('agentName').value || '';
+            const amount = document.getElementById('amountInput').value || '0';
+            const amountNum = parseFloat(amount.replace(/,/g, '')) || 0;
+            const amountChinese = numberToChinese(amountNum);
+            const stage = document.getElementById('litigationStage').options[document.getElementById('litigationStage').selectedIndex].text;
+            const caseType = document.getElementById('caseType').options[document.getElementById('caseType').selectedIndex].text;
+            const totalText = document.getElementById('totalCost').textContent.replace('¥', '').replace(/,/g, '');
+            const totalNum = parseFloat(totalText) || 0;
+            const costRatio = amountNum > 0 ? ((totalNum / amountNum) * 100).toFixed(2) : '0.00';
+            const totalChinese = document.getElementById('totalCostChinese').textContent;
+
+            // 获取各项费用
+            const courtFee = document.getElementById('courtFeeDisplay').textContent.replace('¥', '').trim();
+            const lawyerFee = document.getElementById('lawyerFeeDisplay').textContent.replace('¥', '').trim();
+
+            // 专业模式费用项
+            let preservationFee = '0', insuranceFee = '0', travelFee = '0', 
+                announcementFee = '0', evaluationFee = '0', investigationFee = '0', otherFee = '0';
+
+            if (currentMode === 'professional') {
+                preservationFee = document.getElementById('preservationFeeDisplay').textContent.replace('¥', '').trim();
+                insuranceFee = document.getElementById('insuranceFeeDisplay').textContent.replace('¥', '').trim();
+                travelFee = (parseFloat(document.getElementById('travelFee').value) || 0).toLocaleString('zh-CN');
+                announcementFee = (parseFloat(document.getElementById('announcementFee').value) || 0).toLocaleString('zh-CN');
+                evaluationFee = (parseFloat(document.getElementById('evaluationFee').value) || 0).toLocaleString('zh-CN');
+                investigationFee = (parseFloat(document.getElementById('investigationFee').value) || 0).toLocaleString('zh-CN');
+                otherFee = (parseFloat(document.getElementById('otherFee').value) || 0).toLocaleString('zh-CN');
+            }
+
+            // 构建打印内容
+            let printHTML = `
+                <div style="max-width: 800px; margin: 0 auto; padding: 40px; font-family: 'SimSun', 'Noto Sans SC', serif; color: #333;">
+                    <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
+                        <h1 style="font-size: 24px; margin: 0; font-weight: bold;">诉讼费用预算报告</h1>
+                        <p style="font-size: 12px; color: #666; margin-top: 10px;">Report Generated by 法务通 V1.2.1</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 8px 0; width: 25%; font-weight: bold;">项目名称：</td>
+                                <td style="padding: 8px 0; width: 25%;">${projectName}</td>
+                                <td style="padding: 8px 0; width: 25%; font-weight: bold;">当事人：</td>
+                                <td style="padding: 8px 0; width: 25%;">${party}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0; font-weight: bold;">经办人：</td>
+                                <td style="padding: 8px 0;">${agent}</td>
+                                <td style="padding: 8px 0; font-weight: bold;">报告时间：</td>
+                                <td style="padding: 8px 0;">${new Date().toLocaleString('zh-CN')}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div style="margin-bottom: 25px; background: #f8f9fa; padding: 15px; border-left: 4px solid #4f46e5;">
+                        <div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">案件基本信息</div>
+                        <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 6px 0; width: 20%; color: #666;">争议标的额：</td>
+                                <td style="padding: 6px 0; font-weight: bold; color: #4f46e5;">¥${amount} (${amountChinese})</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 6px 0; color: #666;">案件阶段：</td>
+                                <td style="padding: 6px 0;">${stage}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 6px 0; color: #666;">案件类型：</td>
+                                <td style="padding: 6px 0;">${caseType}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <div style="font-size: 16px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 8px;">费用明细</div>
+                        <table style="width: 100%; font-size: 13px; border-collapse: collapse; margin-bottom: 15px;">
+                            <tr style="background: #f3f4f6;">
+                                <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 40%;">费用项目</td>
+                                <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; text-align: right;">金额（元）</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd;">法院诉讼费</td>
+                                <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-family: monospace;">¥${courtFee}</td>
+                            </tr>
+                            <tr style="background: #fafafa;">
+                                <td style="padding: 10px; border: 1px solid #ddd;">律师代理费</td>
+                                <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-family: monospace;">¥${lawyerFee}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd; padding-left: 20px; color: #666;">法院保全费</td>
+                                <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-family: monospace;">¥${preservationFee}</td>
+                            </tr>
+                            <tr style="background: #fafafa;">
+                                <td style="padding: 10px; border: 1px solid #ddd; padding-left: 20px; color: #666;">保全保险费</td>
+                                <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-family: monospace;">¥${insuranceFee}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd; padding-left: 20px; color: #666;">差旅费用</td>
+                                <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-family: monospace;">¥${travelFee}</td>
+                            </tr>
+                            <tr style="background: #fafafa;">
+                                <td style="padding: 10px; border: 1px solid #ddd; padding-left: 20px; color: #666;">公证费用</td>
+                                <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-family: monospace;">¥${announcementFee}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #ddd; padding-left: 20px; color: #666;">其它费用</td>
+                                <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-family: monospace;">¥${otherFee}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 20px; border: 2px solid #4f46e5; margin-bottom: 25px;">
+                        <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 8px 0; font-size: 16px; font-weight: bold;">费用总计：</td>
+                                <td style="padding: 8px 0; text-align: right; font-size: 20px; font-weight: bold; color: #dc2626; font-family: monospace;">¥${totalText}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0; color: #666;">大写金额：</td>
+                                <td style="padding: 8px 0; text-align: right; font-weight: bold;">${totalChinese}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0; color: #666;">成本占比：</td>
+                                <td style="padding: 8px 0; text-align: right; font-weight: bold; color: ${parseFloat(costRatio) > 10 ? '#dc2626' : '#4f46e5'};">${costRatio}%</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div style="border-top: 1px solid #ddd; padding-top: 15px; font-size: 11px; color: #666; line-height: 1.6;">
+                        <p style="margin: 0 0 5px 0;"><strong>*** 免责声明：</strong>本计算结果仅供参考，实际费用以相关机构实际收取为准。</p>
+                        <p style="margin: 0; text-align: center;">Generated by 法务通 | https://asktai.github.io/AiLTK/</p>
+                    </div>
+                </div>
+            `;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>诉讼费用预算报告 - ${projectName}</title>
+                    <style>
+                        @media print {
+                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                        }
+                    </style>
+                </head>
+                <body>${printHTML}</body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => { printWindow.print(); printWindow.close(); }, 250);
         }
 
         function clearAll() {
