@@ -6,8 +6,8 @@
     <meta name="description" content="诉讼费计算器专业增强版 - 企业诉讼费用成本预算分析系统，支持诉讼费、律师费、保全费、执行费等全功能计算">
     <meta name="keywords" content="诉讼费计算器,律师费计算,诉讼成本,保全费,执行费,法务工具">
     <meta name="author" content="胡皓">
-    <!-- 版本号更新为 V1.2.1 -->
-    <meta name="version" content="V1.2.1">
+    <!-- 版本号更新为 V1.2.2 -->
+    <meta name="version" content="V1.2.2">
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%234f46e5' width='180' height='180' rx='40'/><text x='90' y='130' text-anchor='middle' font-size='120'>⚖️</text></svg>">
@@ -21,10 +21,10 @@
     <style>
         /* 
         =====================================================
-        版本：V1.2.1_自由切换优化版
+        版本：V1.2.2_自由切换优化版
         作者：胡皓
         更新说明：
-        1. 版本号升级至V1.2.1
+        1. 版本号升级至V1.2.2
         2. 优化模式切换逻辑：首次输入密码解锁后，普通模式与专业模式可自由来回切换，无需重复输入密码
         3. 新增解锁状态记忆，提升用户体验
         4. 保持所有计算功能与导出功能完整
@@ -375,7 +375,9 @@
                 <div class="flex items-center space-x-2 md:space-x-4">
                     <!-- 单按钮模式切换 - 已解锁时可自由切换 -->
                     <button id="modeSwitchBtn" 
-                        class="mode-switch-btn px-3 md:px-4 py-2 rounded-lg text-sm font-medium bg-blue-100 text-blue-700 border border-blue-300 flex items-center gap-2 hover:bg-blue-200 transition shadow-sm cursor-pointer select-none">
+                        class="mode-switch-btn px-3 md:px-4 py-2 rounded-lg text-sm font-medium bg-blue-100 text-blue-700 border border-blue-300 flex items-center gap-2 hover:bg-blue-200 transition shadow-sm cursor-pointer select-none"
+                        style="cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;"
+                        onclick="void(0);">
                         <span id="modeIcon">⚡</span>
                         <span id="modeText" class="hidden sm:inline">普通模式</span>
                         <span id="modeTextShort" class="sm:hidden">普通</span>
@@ -385,7 +387,7 @@
                     </button>
                     
                     <!-- 版本号更新 -->
-                    <span id="versionBadge" class="text-xs font-mono text-gray-500 hidden md:block">V1.2.1</span>
+                    <span id="versionBadge" class="text-xs font-mono text-gray-500 hidden md:block">V1.2.0</span>
                 </div>
             </div>
         </div>
@@ -990,7 +992,7 @@
                 <span class="inline-block mx-1 md:mx-2">作者：胡皓</span>
                 <a href="https://github.com/asktai/AiLTK" target="_blank" class="text-blue-400 hover:underline mx-1 md:mx-2">GitHub</a>
                 <!-- 版本号更新 -->
-                <span class="inline-block mx-1 md:mx-2">版本：<span id="footerVersion">V1.2.1</span></span>
+                <span class="inline-block mx-1 md:mx-2">版本：<span id="footerVersion">V1.2.0</span></span>
             </p>
         </div>
     </footer>
@@ -1044,33 +1046,79 @@
         // 移动端事件绑定函数
         function initModeSwitchButton() {
             const btn = document.getElementById('modeSwitchBtn');
-            if (!btn) return;
+            if (!btn) {
+                console.warn('Mode switch button not found');
+                return;
+            }
 
-            // 移除原有onclick属性，改用addEventListener
+            // 移除原有onclick属性（保留void(0) hack）
             btn.removeAttribute('onclick');
+            btn.onclick = null;
 
-            // 同时绑定click和touchend事件，确保移动端兼容性
-            btn.addEventListener('click', toggleMode, { passive: false });
+            // FastClick风格实现：使用touchend立即响应，阻止默认click
+            let trackingClick = false;
+            let touchStartTime = 0;
+            let touchMoved = false;
+
+            // touchstart：记录开始时间和位置
+            btn.addEventListener('touchstart', function(e) {
+                trackingClick = true;
+                touchStartTime = Date.now();
+                touchMoved = false;
+            }, { passive: true });
+
+            // touchmove：检测是否移动（防止误触）
+            btn.addEventListener('touchmove', function(e) {
+                touchMoved = true;
+            }, { passive: true });
+
+            // touchend：立即执行逻辑（FastClick核心）
             btn.addEventListener('touchend', function(e) {
-                e.preventDefault(); // 阻止默认行为
-                e.stopPropagation(); // 阻止事件冒泡
-                toggleMode(e);
+                if (!trackingClick) return;
+                trackingClick = false;
+
+                // 如果移动距离过大，不触发点击
+                if (touchMoved) return;
+
+                // 阻止默认的click事件（300ms后的那个）
+                e.preventDefault();
+
+                // 立即执行切换
+                handleModeSwitch();
+
+                // 添加视觉反馈
+                btn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    btn.style.transform = '';
+                }, 100);
             }, { passive: false });
 
-            // 添加触摸反馈效果
-            btn.addEventListener('touchstart', function() {
-                this.style.transform = 'scale(0.95)';
-                this.style.opacity = '0.8';
-            }, { passive: true });
+            // 桌面端保留click事件支持
+            btn.addEventListener('click', function(e) {
+                // 如果是移动设备，忽略click（因为touchend已经处理）
+                if ('ontouchstart' in window) return;
+                handleModeSwitch();
+            });
 
-            btn.addEventListener('touchend', function() {
-                this.style.transform = '';
-                this.style.opacity = '';
-            }, { passive: true });
-
-            // 防止300ms延迟
-            btn.style.touchAction = 'manipulation';
+            console.log('Mode switch button initialized');
         }
+
+        // 独立处理函数
+        function handleModeSwitch() {
+            if (currentMode === 'normal') {
+                if (hasUnlockedPro) {
+                    currentMode = 'professional';
+                    updateModeUI();
+                } else {
+                    document.getElementById('passwordOverlay').classList.remove('hidden');
+                }
+            } else {
+                currentMode = 'normal';
+                updateModeUI();
+            }
+        }
+
+        // 移动端兼容：为模式切换按钮同时绑定click和touchend事件
 
         // ==================== 虚拟键盘拖动支持 ====================
         function initKeyboardDrag() {
@@ -1929,7 +1977,7 @@
                 <div style="max-width: 800px; margin: 0 auto; padding: 40px; font-family: 'SimSun', 'Noto Sans SC', serif; color: #333;">
                     <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
                         <h1 style="font-size: 24px; margin: 0; font-weight: bold;">诉讼费用预算报告</h1>
-                        <p style="font-size: 12px; color: #666; margin-top: 10px;">Report Generated by 法务通 V1.2.1</p>
+                        <p style="font-size: 12px; color: #666; margin-top: 10px;">Report Generated by 法务通 V1.2.2</p>
                     </div>
 
                     <div style="margin-bottom: 25px;">
