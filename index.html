@@ -6,12 +6,12 @@
     <meta name="description" content="律师费计算器专业增强版 - 企业诉讼费用成本预算分析系统，支持诉讼费、律师费、保全费、执行费等全功能计算">
     <meta name="keywords" content="律师费计算器,诉讼费计算,诉讼成本,保全费,执行费,法务工具">
     <meta name="author" content="胡皓">
-    <meta name="version" content="V1.7.1">
+    <meta name="version" content="V1.7.2">
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%234f46e5' width='180' height='180' rx='40'/><text x='90' y='130' text-anchor='middle' font-size='120'>⚖️</text></svg>">
     
-    <title>律师费计算器V1.7.1 - 诉讼费用成本预算分析系统</title>
+    <title>律师费计算器V1.7.2 - 诉讼费用成本预算分析系统</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -489,31 +489,31 @@
         
         /* 成本占比颜色等级优化 - 标签样式 */
         .cost-ratio-high { 
-            color: #dc2626; 
+            color: #991b1b; 
             font-weight: 700;
-            background: rgba(220, 38, 38, 0.1);
+            background: rgba(254, 226, 226, 0.8);
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 0.85em;
         }
         .cost-ratio-medium { 
-            color: #ea580c; 
+            color: #9a3412; 
             font-weight: 600;
-            background: rgba(234, 88, 12, 0.1);
+            background: rgba(255, 237, 213, 0.8);
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 0.85em;
         }
         .cost-ratio-normal { 
-            color: #2563eb;
-            background: rgba(37, 99, 235, 0.1);
+            color: #1e40af;
+            background: rgba(219, 234, 254, 0.8);
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 0.85em;
         }
         .cost-ratio-low { 
-            color: #059669;
-            background: rgba(5, 150, 105, 0.1);
+            color: #065f46;
+            background: rgba(209, 250, 229, 0.8);
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 0.85em;
@@ -596,15 +596,15 @@
         /* 左侧彩色边框发光效果 */
         #courtFeeCard {
             border-left: 4px solid #165DFF;
-            background: linear-gradient(90deg, rgba(22, 93, 255, 0.08) 0%, rgba(255, 255, 255, 0.7) 100%);
+            background: linear-gradient(90deg, rgba(22, 93, 255, 0.03) 0%, rgba(255, 255, 255, 0.9) 100%);
         }
         #lawyerFeeCard {
             border-left: 4px solid #4096FF;
-            background: linear-gradient(90deg, rgba(64, 150, 255, 0.08) 0%, rgba(255, 255, 255, 0.7) 100%);
+            background: linear-gradient(90deg, rgba(64, 150, 255, 0.03) 0%, rgba(255, 255, 255, 0.9) 100%);
         }
         #additionalFeeRow {
             border-left: 4px solid #FA8C16;
-            background: linear-gradient(90deg, rgba(250, 140, 22, 0.08) 0%, rgba(255, 255, 255, 0.7) 100%);
+            background: linear-gradient(90deg, rgba(250, 140, 22, 0.03) 0%, rgba(255, 255, 255, 0.9) 100%);
         }
 
         /* 悬浮提升效果 */
@@ -727,7 +727,7 @@
                         </svg>
                     </button>
                     
-                    <span id="versionBadge" class="text-xs font-mono text-gray-500 hidden md:block">V1.7.1</span>
+                    <span id="versionBadge" class="text-xs font-mono text-gray-500 hidden md:block">V1.7.2</span>
                 </div>
             </div>
         </div>
@@ -1051,6 +1051,10 @@
                             </svg>
                         </div>
                         <div class="collapsible-content px-3 md:px-4 pb-3 md:pb-4 space-y-3">
+                            <div class="text-[10px] text-gray-500 bg-orange-50/50 p-2 rounded-lg border border-orange-100 mb-2">
+                                💡 附加费用包括：法院保全费、保全保险费、差旅费、公告费、公证费、评估/鉴定费、调查取证费、其它费用等
+                            </div>
+
                             <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                                 <div class="flex items-center gap-2">
                                     <input type="checkbox" id="enablePreservation" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
@@ -1539,7 +1543,7 @@
             <p class="text-xs">
                 <span class="inline-block mx-1 md:mx-2">作者：胡皓</span>
                 <a href="https://github.com/asktai/AiLTK" target="_blank" class="text-blue-400 hover:underline mx-1 md:mx-2">GitHub</a>
-                <span class="inline-block mx-1 md:mx-2">版本：<span id="footerVersion">V1.7.1</span></span>
+                <span class="inline-block mx-1 md:mx-2">版本：<span id="footerVersion">V1.7.2</span></span>
             </p>
         </div>
     </footer>
@@ -2731,7 +2735,7 @@ function syncAmountDisplay() {
             return str;
         }
 
-        // V1.7.1 修复：去除前导零
+        // V1.7.2 修复：去除前导零
         function formatAmountInput(input) {
             let value = input.value.replace(/,/g, '').replace(/[^\d.]/g, '');
             
@@ -3148,8 +3152,9 @@ function syncAmountDisplay() {
             const courtFeeEnabled = getSwitchState('enableCourtFee', true);
             const lawyerFeeEnabled = getSwitchState('enableLawyerFee', true);
             const cooperationEnabled = getSwitchState('enableCooperation', false);
-            const cooperationSaving = document.getElementById('cooperationSaving') ? 
-                document.getElementById('cooperationSaving').textContent.replace(/[¥,-]/g, '') : '0';
+            // 直接调用 calculateAll 获取最新的计算结果
+            const calcResult = calculateAll();
+            const cooperationSaving = calcResult ? calcResult.cooperationSaving : 0;
 
             let projectName = document.getElementById('projectName').value.trim();
             if (!projectName) {
@@ -3338,8 +3343,9 @@ function syncAmountDisplay() {
             const courtFeeEnabled = getSwitchState('enableCourtFee', true);
             const lawyerFeeEnabled = getSwitchState('enableLawyerFee', true);
             const cooperationEnabled = getSwitchState('enableCooperation', false);
-            const cooperationSaving = document.getElementById('cooperationSaving') ? 
-                document.getElementById('cooperationSaving').textContent.replace(/[¥,-]/g, '') : '0';
+            // 直接调用 calculateAll 获取最新的计算结果
+            const calcResult = calculateAll();
+            const cooperationSaving = calcResult ? calcResult.cooperationSaving : 0;
             
             let projectName = document.getElementById('projectName').value.trim();
             if (!projectName) {
@@ -3380,7 +3386,7 @@ function syncAmountDisplay() {
                 <div style="max-width: 800px; margin: 0 auto; padding: 40px; font-family: 'PingFang SC', 'Microsoft YaHei', 'SimSun', serif; color: #333; line-height: 1.6;">
                     <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
                         <h1 style="font-size: 24px; margin: 0; font-weight: bold;">☆诉讼费用预算报告☆</h1>
-                        <p style="font-size: 12px; color: #666; margin-top: 10px;">Report Generated by 法务通 V1.7.1</p>
+                        <p style="font-size: 12px; color: #666; margin-top: 10px;">Report Generated by 法务通 V1.7.2</p>
                     </div>
 
                     <div style="margin-bottom: 25px;">
