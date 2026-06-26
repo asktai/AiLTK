@@ -903,7 +903,7 @@
                             <!-- 地区官方标准开关 -->
                             <div id="officialStandardToggle" class="flex items-center justify-between p-2 bg-blue-50 rounded-lg border border-blue-200">
                                 <div class="flex items-center gap-2">
-                                    <input type="checkbox" id="useOfficialStandard" class="w-4 h-4 text-blue-600 rounded" onchange="toggleOfficialStandard(); calculateAll();">
+                                    <input type="checkbox" id="useOfficialStandard" class="w-4 h-4 text-blue-600 rounded" checked onchange="toggleOfficialStandard(); calculateAll();">
                                     <label for="useOfficialStandard" class="text-xs md:text-sm font-medium text-blue-700">使用地区官方标准</label>
                                 </div>
                                 <button onclick="showFeeBasis()" class="text-xs text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1">
@@ -1034,7 +1034,7 @@
 
                             <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                                 <div class="flex items-center gap-2">
-                                    <input type="checkbox" id="enablePreservation" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
+                                    <input type="checkbox" id="enablePreservation" class="w-4 h-4 text-orange-600 rounded" checked onchange="calculateAll()">
                                     <label class="text-xs md:text-sm font-medium text-gray-600">法院保全费</label>
                                 </div>
                                 <span id="preservationFeeDisplay" class="text-xs md:text-sm font-bold text-orange-600">¥0</span>
@@ -1042,7 +1042,7 @@
                             
                             <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                                 <div class="flex items-center gap-2 flex-1">
-                                    <input type="checkbox" id="enableInsurance" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
+                                    <input type="checkbox" id="enableInsurance" class="w-4 h-4 text-orange-600 rounded" checked onchange="calculateAll()">
                                     <div class="flex-1 min-w-0">
                                         <label class="text-xs md:text-sm font-medium text-gray-600 block truncate">保全保险费</label>
                                         <div class="flex items-center gap-2 mt-1">
@@ -1059,7 +1059,7 @@
 
                             <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                                 <div class="flex items-center gap-2 flex-1">
-                                    <input type="checkbox" id="enableTravel" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
+                                    <input type="checkbox" id="enableTravel" class="w-4 h-4 text-orange-600 rounded" checked onchange="calculateAll()">
                                     <div class="flex-1">
                                         <label class="text-xs md:text-sm font-medium text-gray-600">差旅费</label>
                                     </div>
@@ -1071,7 +1071,7 @@
 
                             <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                                 <div class="flex items-center gap-2 flex-1">
-                                    <input type="checkbox" id="enableAnnouncement" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
+                                    <input type="checkbox" id="enableAnnouncement" class="w-4 h-4 text-orange-600 rounded" checked onchange="calculateAll()">
                                     <div class="flex-1">
                                         <label class="text-xs md:text-sm font-medium text-gray-600">公告费</label>
                                     </div>
@@ -1083,7 +1083,7 @@
 
                             <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                                 <div class="flex items-center gap-2 flex-1">
-                                    <input type="checkbox" id="enableNotary" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
+                                    <input type="checkbox" id="enableNotary" class="w-4 h-4 text-orange-600 rounded" checked onchange="calculateAll()">
                                     <div class="flex-1">
                                         <label class="text-xs md:text-sm font-medium text-gray-600">公证费</label>
                                     </div>
@@ -1095,7 +1095,7 @@
 
                             <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                                 <div class="flex items-center gap-2 flex-1">
-                                    <input type="checkbox" id="enableEvaluation" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
+                                    <input type="checkbox" id="enableEvaluation" class="w-4 h-4 text-orange-600 rounded" checked onchange="calculateAll()">
                                     <div class="flex-1">
                                         <label class="text-xs md:text-sm font-medium text-gray-600">评估/鉴定费</label>
                                     </div>
@@ -1107,7 +1107,7 @@
 
                             <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                                 <div class="flex items-center gap-2 flex-1">
-                                    <input type="checkbox" id="enableInvestigation" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
+                                    <input type="checkbox" id="enableInvestigation" class="w-4 h-4 text-orange-600 rounded" checked onchange="calculateAll()">
                                     <div class="flex-1">
                                         <label class="text-xs md:text-sm font-medium text-gray-600">调查取证费</label>
                                     </div>
@@ -1119,7 +1119,7 @@
 
                             <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                                 <div class="flex items-center gap-2 flex-1">
-                                    <input type="checkbox" id="enableOther" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
+                                    <input type="checkbox" id="enableOther" class="w-4 h-4 text-orange-600 rounded" checked onchange="calculateAll()">
                                     <div class="flex-1">
                                         <label class="text-xs md:text-sm font-medium text-gray-600">其它费用</label>
                                     </div>
@@ -1145,7 +1145,7 @@
                         <div class="collapsible-content px-3 md:px-4 pb-3 md:pb-4 space-y-2">
                             <div class="flex items-center justify-between p-2 bg-indigo-50 rounded-lg border border-indigo-200">
                                 <div class="flex items-center gap-2">
-                                    <input type="checkbox" id="enableCooperation" class="w-4 h-4 text-indigo-600 rounded" onchange="calculateAll()">
+                                    <input type="checkbox" id="enableCooperation" class="w-4 h-4 text-indigo-600 rounded" checked onchange="calculateAll()">
                                     <label for="enableCooperation" class="text-xs md:text-sm font-medium text-indigo-800">启用法务代理节省费用</label>
                                 </div>
                                 <span class="text-xs text-indigo-600">法务代理可节省律师费</span>
@@ -1153,7 +1153,7 @@
 
                             <select id="cooperationMode" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500" onchange="updateCooperationMode()">
                                 <option value="0">律师代理（0%减免）</option>
-                                <option value="100">法务代理（100%减免）</option>
+                                <option value="100" selected>法务代理（100%减免）</option>
                                 <option value="30">法务主导+律师指导（30%减免）</option>
                                 <option value="70">律师主导+法务辅助（70%减免）</option>
                                 <option value="custom">自定义减免</option>
