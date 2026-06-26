@@ -6,12 +6,12 @@
     <meta name="description" content="律师费计算器专业增强版 - 企业诉讼费用成本预算分析系统，支持诉讼费、律师费、保全费、执行费等全功能计算">
     <meta name="keywords" content="律师费计算器,诉讼费计算,诉讼成本,保全费,执行费,法务工具">
     <meta name="author" content="胡皓">
-    <meta name="version" content="V1.7.2">
+    <meta name="version" content="V1.7.4">
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%234f46e5' width='180' height='180' rx='40'/><text x='90' y='130' text-anchor='middle' font-size='120'>⚖️</text></svg>">
     
-    <title>律师费计算器V1.7.2 - 诉讼费用成本预算分析系统</title>
+    <title>律师费计算器V1.7.4 - 诉讼费用成本预算分析系统</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -93,22 +93,22 @@
         }
 
         @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(22, 93, 255, 0.4); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
             50% { box-shadow: 0 0 0 10px rgba(22, 93, 255, 0); }
         }
 
         .theme-normal {
-            --primary-color: #165DFF;
-            --secondary-color: #0B4AC9;
-            --accent-color: #4096FF;
+            --primary-color: #3B82F6;
+            --secondary-color: #2563EB;
+            --accent-color: #60A5FA;
             --glass-bg: rgba(255, 255, 255, 0.97);
-            --glass-border: rgba(22, 93, 255, 0.15);
-            --shadow-color: rgba(22, 93, 255, 0.12);
+            --glass-border: rgba(59, 130, 246, 0.15);
+            --shadow-color: rgba(59, 130, 246, 0.12);
         }
 
         .theme-professional {
-            --primary-color: #0039A6;
-            --secondary-color: #165DFF;
+            --primary-color: #1D4ED8;
+            --secondary-color: #3B82F6;
             --accent-color: #52C41A;
             --glass-bg: rgba(255, 255, 255, 0.97);
             --glass-border: rgba(0, 57, 166, 0.2);
@@ -119,40 +119,29 @@
         
         body {
             font-family: 'Inter', 'Noto Sans SC', sans-serif;
-            background: linear-gradient(135deg, #001529 0%, #002766 30%, #165DFF 70%, #4096FF 100%);
+            background: #f1f5f9;
             background-attachment: fixed;
-            background-size: 200% 200%;
-            animation: gradientShift 15s ease infinite;
             min-height: 100vh;
             -webkit-tap-highlight-color: transparent;
         }
         
         /* 优化后的玻璃拟态效果 */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 
-                0 4px 6px -1px rgba(0, 0, 0, 0.05),
-                0 10px 15px -3px rgba(22, 93, 255, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
         }
 
         /* 右侧结果主面板特殊样式 */
         .glass-panel.rounded-2xl {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
-            border: 1px solid rgba(22, 93, 255, 0.15);
-            box-shadow: 
-                0 20px 40px -10px rgba(22, 93, 255, 0.15),
-                0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         .glass-panel:hover {
-            box-shadow: 
-                0 12px 40px 0 rgba(31, 38, 135, 0.15),
-                0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             transform: translateY(-2px);
         }
         
@@ -162,7 +151,7 @@
         }
         
         .collapsible-section:hover {
-            border-left-color: #4f46e5;
+            border-left-color: #60A5FA;
         }
         
         .collapsible-header {
@@ -196,10 +185,7 @@
             font-weight: 700;
             font-feature-settings: 'tnum' on, 'lnum' on;
             letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #165DFF 0%, #0039A6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #1e40af;
         }
         
         .virtual-keyboard {
@@ -207,18 +193,14 @@
             bottom: 20px;
             right: 20px;
             width: 280px;
-            background: linear-gradient(145deg, #1f2937 0%, #111827 100%);
-            border-radius: 20px;
+            background: #334155;
+            border-radius: 16px;
             padding: 12px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 
-                        0 0 0 1px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
             z-index: 1000;
             touch-action: none;
             user-select: none;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                        opacity 0.3s, 
-                        width 0.3s,
-                        box-shadow 0.3s;
+            transition: transform 0.3s ease, opacity 0.3s, width 0.3s;
         }
 
         .virtual-keyboard:hover {
@@ -367,7 +349,7 @@
             height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: #f1f5f9;
         }
         
         input::placeholder, textarea::placeholder {
@@ -377,11 +359,11 @@
         }
 
         input:focus::placeholder, textarea:focus::placeholder {
-            color: #D1D5DB;
+            color: #9ca3af;
         }
         
         ::-webkit-scrollbar-thumb {
-            background: #888;
+            background: #cbd5e1;
             border-radius: 3px;
         }
         
@@ -389,11 +371,11 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #10b981;
+            background: #3B82F6;
             color: white;
             padding: 12px 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             z-index: 9999;
             opacity: 0;
             transform: translateY(-20px);
@@ -406,25 +388,19 @@
         }
         
         .warning-text {
-            color: #dc2626;
+            color: #ef4444;
             font-weight: 700;
         }
         
         .pro-mode-title {
-            background: linear-gradient(135deg, #165DFF 0%, #0039A6 50%, #001F4D 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 2px 10px rgba(0, 57, 166, 0.15);
+            color: #1e40af;
+            font-weight: 800;
             letter-spacing: -0.02em;
         }
         
         .normal-mode-title {
-            background: linear-gradient(135deg, #4096FF 0%, #165DFF 50%, #0039A6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 2px 10px rgba(22, 93, 255, 0.15);
+            color: #2563eb;
+            font-weight: 800;
             letter-spacing: -0.02em;
         }
         
@@ -489,31 +465,31 @@
         
         /* 成本占比颜色等级优化 - 标签样式 */
         .cost-ratio-high { 
-            color: #991b1b; 
+            color: #dc2626; 
             font-weight: 700;
-            background: rgba(254, 226, 226, 0.8);
+            background: #fef2f2;
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 0.85em;
         }
         .cost-ratio-medium { 
-            color: #9a3412; 
+            color: #ea580c; 
             font-weight: 600;
-            background: rgba(255, 237, 213, 0.8);
+            background: #fff7ed;
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 0.85em;
         }
         .cost-ratio-normal { 
-            color: #1e40af;
-            background: rgba(219, 234, 254, 0.8);
+            color: #2563eb;
+            background: #eff6ff;
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 0.85em;
         }
         .cost-ratio-low { 
-            color: #065f46;
-            background: rgba(209, 250, 229, 0.8);
+            color: #059669;
+            background: #f0fdf4;
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 0.85em;
@@ -523,6 +499,7 @@
             font-size: 1.5rem !important;
             font-weight: 700 !important;
             letter-spacing: 0.05em;
+            border-color: #3B82F6 !important;
         }
         
         @media (max-width: 640px) {
@@ -595,11 +572,11 @@
 
         /* 左侧彩色边框发光效果 */
         #courtFeeCard {
-            border-left: 4px solid #165DFF;
-            background: linear-gradient(90deg, rgba(22, 93, 255, 0.03) 0%, rgba(255, 255, 255, 0.9) 100%);
+            border-left: 4px solid #3B82F6;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.03) 0%, rgba(255, 255, 255, 0.9) 100%);
         }
         #lawyerFeeCard {
-            border-left: 4px solid #4096FF;
+            border-left: 4px solid #60A5FA;
             background: linear-gradient(90deg, rgba(64, 150, 255, 0.03) 0%, rgba(255, 255, 255, 0.9) 100%);
         }
         #additionalFeeRow {
@@ -611,7 +588,7 @@
         #feeCardsContainer .flex:hover {
             transform: translateY(-2px) scale(1.01);
             box-shadow: 
-                0 10px 20px -5px rgba(22, 93, 255, 0.15),
+                0 10px 20px -5px rgba(59, 130, 246, 0.15),
                 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             background: rgba(255, 255, 255, 0.9);
         }
@@ -627,8 +604,8 @@
         /* 渐变色进度条 */
         #costRatioBar {
             background: linear-gradient(90deg, 
-                #165DFF 0%, 
-                #4096FF 25%, 
+                #3B82F6 0%, 
+                #60A5FA 25%, 
                 #52C41A 50%, 
                 #FAAD14 75%, 
                 #F5222D 100%
@@ -663,13 +640,13 @@
         }
 
         thead tr {
-            background: rgba(248, 250, 252, 0.8);
-            border-bottom: 2px solid rgba(226, 232, 240, 0.8);
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
         }
 
         th {
             font-weight: 600;
-            color: #1e293b;
+            color: #334155;
             letter-spacing: 0.05em;
             text-transform: uppercase;
             font-size: 0.75rem;
@@ -678,22 +655,22 @@
 
         td {
             padding: 12px 16px;
-            border-bottom: 1px solid rgba(226, 232, 240, 0.4);
+            border-bottom: 1px solid #e2e8f0;
             transition: background 0.2s;
         }
 
         tr:hover td {
-            background: rgba(22, 93, 255, 0.03);
+            background: #f1f5f9;
         }
     </style>
 </head>
-<body class="text-gray-800">
+<body class="text-gray-700">
 
     <!-- 密码保护层 -->
     <div id="pasteToast" class="paste-toast">已智能识别并粘贴金额</div>
 
     <!-- 顶部导航 -->
-    <nav class="bg-white shadow-lg sticky top-0 z-50 no-print">
+    <nav class="bg-white shadow-sm sticky top-0 z-50 no-print border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center space-x-3">
@@ -703,20 +680,20 @@
                             <h1 class="text-lg md:text-xl font-bold normal-mode-title truncate tracking-tight">
                                 律师费计算器
                             </h1>
-                            <p class="text-[10px] md:text-xs text-gray-500">专业增强版</p>
+                            <p class="text-[10px] md:text-xs text-gray-400">专业增强版</p>
                         </div>
                         <div id="proTitle" class="hidden">
                             <h1 class="text-lg md:text-xl font-bold pro-mode-title truncate tracking-tight">
                                 律师费计算器
                             </h1>
-                            <p class="text-[10px] md:text-xs text-gray-500">专业模式</p>
+                            <p class="text-[10px] md:text-xs text-gray-400">专业模式</p>
                         </div>
                     </div>
                 </div>
                 
                 <div class="flex items-center space-x-2 md:space-x-4">
                     <button id="modeSwitchBtn" 
-                        class="mode-switch-btn px-3 md:px-4 py-2 rounded-lg text-sm font-medium bg-blue-100 text-blue-700 border border-blue-300 flex items-center gap-2 hover:bg-blue-100 transition shadow-sm cursor-pointer select-none"
+                        class="mode-switch-btn px-3 md:px-4 py-2 rounded-lg text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-2 hover:bg-blue-50 transition cursor-pointer select-none"
                         style="cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;"
                         onclick="handleModeSwitch()">
                         <span id="modeIcon">⚡</span>
@@ -727,16 +704,16 @@
                         </svg>
                     </button>
                     
-                    <span id="versionBadge" class="text-xs font-mono text-gray-500 hidden md:block">V1.7.2</span>
+                    <span id="versionBadge" class="text-xs font-mono text-gray-400 hidden md:block">V1.7.4</span>
                 </div>
             </div>
         </div>
         
-        <div id="bannerNormal" class="bg-gradient-to-r from-blue-600 via-blue-600 to-blue-500 text-white text-center py-1.5 md:py-2 text-xs md:text-sm font-medium no-print">
+        <div id="bannerNormal" class="bg-blue-500 text-white text-center py-1.5 md:py-2 text-xs md:text-sm font-medium no-print">
             <span class="inline-block animate-pulse">💡</span>
             小法师胡皓 丰衣足食 努力自研 只为打造适合法务使用的专业法律计算器!
         </div>
-        <div id="bannerPro" class="hidden bg-gradient-to-r from-blue-800 via-blue-700 to-blue-600 text-white text-center py-1.5 md:py-2 text-xs md:text-sm font-medium no-print">
+        <div id="bannerPro" class="hidden bg-blue-800 text-white text-center py-1.5 md:py-2 text-xs md:text-sm font-medium no-print">
             <span class="inline-block animate-pulse">📊</span>
             小法师胡皓 丰衣足食 努力自研 只为打造适合法务使用的专业法律计算器!
         </div>
@@ -747,12 +724,12 @@
         <!-- 快速场景预设 -->
         <div class="glass-panel rounded-xl md:rounded-2xl p-4 md:p-6 mb-4 md:mb-6 shadow-lg no-print">
             <div class="flex flex-wrap gap-2 md:gap-3 items-center">
-                <span class="text-xs md:text-sm font-semibold text-gray-600 whitespace-nowrap">快速场景：</span>
+                <span class="text-xs md:text-sm font-semibold text-gray-500 whitespace-nowrap">快速场景：</span>
                 <div class="flex flex-wrap gap-2">
-                    <button onclick="quickSet(100000)" class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs md:text-sm hover:bg-blue-100 transition active:scale-95">小额(10万)</button>
-                    <button onclick="quickSet(1000000)" class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs md:text-sm hover:bg-blue-100 transition active:scale-95">常规(100万)</button>
-                    <button onclick="quickSet(10000000)" class="px-3 py-1.5 bg-red-100 text-red-700 rounded-full text-xs md:text-sm hover:bg-red-200 transition active:scale-95 tracking-wide font-medium">重大(1000万)</button>
-                    <button onclick="setCaseType('labor')" class="px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs md:text-sm hover:bg-green-200 transition active:scale-95 tracking-wide font-medium">劳动争议</button>
+                    <button onclick="quickSet(100000)" class="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs md:text-sm hover:bg-blue-50 transition active:scale-95">小额(10万)</button>
+                    <button onclick="quickSet(1000000)" class="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs md:text-sm hover:bg-blue-50 transition active:scale-95">常规(100万)</button>
+                    <button onclick="quickSet(10000000)" class="px-3 py-1.5 bg-red-50 text-red-700 rounded-full text-xs md:text-sm hover:bg-red-200 transition active:scale-95 tracking-wide font-medium">重大(1000万)</button>
+                    <button onclick="setCaseType('labor')" class="px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-xs md:text-sm hover:bg-green-200 transition active:scale-95 tracking-wide font-medium">劳动争议</button>
                 </div>
                 <button onclick="toggleCalculator()" class="ml-auto px-3 py-1.5 bg-gray-800 text-white rounded-lg text-xs md:text-sm hover:bg-gray-700 transition flex items-center gap-1 active:scale-95">
                     <span>⌨️</span>
@@ -769,25 +746,25 @@
                 <!-- 1. 案件基本信息 -->
                 <div class="glass-panel rounded-xl shadow-lg collapsible-section" id="section-basic">
                     <div class="collapsible-header p-3 md:p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors" onclick="toggleSection('section-basic')">
-                        <h3 class="text-base md:text-lg font-bold text-gray-800 flex items-center gap-2 tracking-tight">
-                            <span class="w-7 h-7 md:w-8 md:h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm md:text-base">📋</span>
+                        <h3 class="text-base md:text-lg font-bold text-gray-700 flex items-center gap-2 tracking-tight">
+                            <span class="w-7 h-7 md:w-8 md:h-8 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 text-sm md:text-base">📋</span>
                             <span class="truncate">案件基本信息</span>
                         </h3>
-                        <svg class="w-5 h-5 text-gray-500 toggle-icon flex-shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-gray-400 toggle-icon flex-shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </div>
 
                     <div class="collapsible-content px-3 md:px-4 pb-3 md:pb-4 space-y-3">
                         <div class="p-3 md:p-4 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 rounded-xl border border-blue-100">
-                            <label class="block text-xs md:text-sm font-bold text-blue-900 mb-2 flex items-center gap-2">
-                                <span class="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[10px]">¥</span>
+                            <label class="block text-xs md:text-sm font-bold text-blue-700 mb-2 flex items-center gap-2">
+                                <span class="w-5 h-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-[10px]">¥</span>
                                 案件金额/标的额（元）
-                                <span class="text-[10px] text-blue-600 font-normal bg-blue-100 px-2 py-0.5 rounded-full">诉讼费、律师费计算来源</span>
+                                <span class="text-[10px] text-blue-600 font-normal bg-blue-50 px-2 py-0.5 rounded-full">诉讼费、律师费计算来源</span>
                             </label>
                             <div class="relative">
                                 <input type="text" id="amountInput" placeholder="输入金额（支持智能粘贴）" 
-                                    class="w-full px-4 py-2.5 text-lg md:text-xl font-bold border-2 border-blue-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 number-font bg-white shadow-inner amount-input-highlight tracking-tight"
+                                    class="w-full px-4 py-2.5 text-lg md:text-xl font-bold border-2 border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 number-font bg-white shadow-inner amount-input-highlight tracking-tight"
                                     style="font-family: var(--font-mono), 'PingFang SC', sans-serif;"
                                     oninput="formatAmountInput(this); debounceCalculate(); syncAmountDisplay();"
                                     onfocus="activeInput = this"
@@ -796,40 +773,40 @@
                             </div>
                             <div class="mt-2 flex items-center gap-2">
                                 <span class="text-[10px] text-blue-600 font-medium whitespace-nowrap">大写：</span>
-                                <div id="amountChinese" class="text-sm md:text-base text-blue-800 font-bold truncate flex-1 bg-white/50 px-2 py-1 rounded border border-blue-100 chinese-amount-display">--</div>
+                                <div id="amountChinese" class="text-sm md:text-base text-blue-700 font-bold truncate flex-1 bg-white/50 px-2 py-1 rounded border border-blue-100 chinese-amount-display">--</div>
                             </div>
                         </div>
 
                         <div class="input-group">
-                            <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-1 tracking-wide">项目名称</label>
+                            <label class="block text-xs md:text-sm font-semibold text-gray-600 mb-1 tracking-wide">项目名称</label>
                             <input type="text" id="projectName" placeholder="纠纷案" oninput="updateTopInfoDisplay()" 
-                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                                 onpaste="smartPaste(event, this)">
                         </div>
 
                         <div class="input-group">
-                            <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-1 tracking-wide">攻方</label>
+                            <label class="block text-xs md:text-sm font-semibold text-gray-600 mb-1 tracking-wide">攻方</label>
                             <input type="text" id="attackerName" placeholder="XX有限公司" oninput="updateTopInfoDisplay()" 
-                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                                 onpaste="smartPaste(event, this)">
                         </div>
                         <div class="input-group">
-                            <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-1 tracking-wide">守方</label>
+                            <label class="block text-xs md:text-sm font-semibold text-gray-600 mb-1 tracking-wide">守方</label>
                             <input type="text" id="defenderName" placeholder="XXX有限公司" oninput="updateTopInfoDisplay()" 
-                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                                 onpaste="smartPaste(event, this)">
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
                             <div class="input-group">
-                                <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-1 tracking-wide">经办人</label>
+                                <label class="block text-xs md:text-sm font-semibold text-gray-600 mb-1 tracking-wide">经办人</label>
                                 <input type="text" id="agentName" placeholder="纠纷案件需求方业务人员" oninput="updateTopInfoDisplay()" 
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
                             </div>
                             <div class="input-group">
-                                <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-1 tracking-wide">代理人</label>
+                                <label class="block text-xs md:text-sm font-semibold text-gray-600 mb-1 tracking-wide">代理人</label>
                                 <input type="text" id="partyName" placeholder="律师/法务等代理人" oninput="updateTopInfoDisplay()" 
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
                             </div>
                         </div>
                     </div>
@@ -837,11 +814,11 @@
 
                 <!-- 2. 律师费计算器 --><div class="glass-panel rounded-xl shadow-lg collapsible-section" id="section-lawyer">
                     <div class="collapsible-header p-3 md:p-4 flex justify-between items-center" onclick="toggleSection('section-lawyer')">
-                        <h3 class="text-base md:text-lg font-bold text-gray-800 flex items-center gap-2 tracking-tight">
-                            <span class="w-7 h-7 md:w-8 md:h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-sm md:text-base">👔</span>
+                        <h3 class="text-base md:text-lg font-bold text-gray-700 flex items-center gap-2 tracking-tight">
+                            <span class="w-7 h-7 md:w-8 md:h-8 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 text-sm md:text-base">👔</span>
                             <span class="truncate">律师费计算器</span>
                         </h3>
-                        <svg class="w-5 h-5 text-gray-500 toggle-icon flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-gray-400 toggle-icon flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </div>
@@ -849,14 +826,14 @@
                         <div class="flex items-center justify-between p-2 bg-blue-50 rounded-lg border border-blue-200">
                             <div class="flex items-center gap-2">
                                 <input type="checkbox" id="enableLawyerFee" class="w-4 h-4 text-blue-600 rounded" checked onchange="calculateAll()">
-                                <label for="enableLawyerFee" class="text-xs md:text-sm font-medium text-blue-800">启用律师费计算</label>
+                                <label for="enableLawyerFee" class="text-xs md:text-sm font-medium text-blue-700">启用律师费计算</label>
                             </div>
                             <span class="text-xs text-blue-600">参与总费用计算</span>
                         </div>
 
                         <div>
-                            <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-1 tracking-wide">地区选择</label>
-                            <select id="regionSelect" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateLawyerFeeStandard()">
+                            <label class="block text-xs md:text-sm font-semibold text-gray-600 mb-1 tracking-wide">地区选择</label>
+                            <select id="regionSelect" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateLawyerFeeStandard()">
                                 <option value="national">全国通用</option>
                                 <optgroup label="华东地区">
                                     <option value="shanghai">上海市</option>
@@ -909,12 +886,12 @@
                                     <option value="taiwan">台湾地区</option>
                                 </optgroup>
                             </select>
-                            <p class="text-[10px] text-gray-500 mt-1">依据《广东省律师服务政府指导价》（粤价〔2006〕298号）</p>
+                            <p class="text-[10px] text-gray-400 mt-1">依据《广东省律师服务政府指导价》（粤价〔2006〕298号）</p>
                         </div>
 
                         <div>
-                            <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-1 tracking-wide">计费模式</label>
-                            <select id="lawyerFeeMode" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="toggleLawyerFeeMode()">
+                            <label class="block text-xs md:text-sm font-semibold text-gray-600 mb-1 tracking-wide">计费模式</label>
+                            <select id="lawyerFeeMode" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="toggleLawyerFeeMode()">
                                 <option value="fixed">A. 固定费用</option>
                                 <option value="ratio" selected>B. 按比例收费</option>
                                 <option value="hourly">C. 计时收费</option>
@@ -927,9 +904,9 @@
                             <div id="officialStandardToggle" class="flex items-center justify-between p-2 bg-blue-50 rounded-lg border border-blue-200">
                                 <div class="flex items-center gap-2">
                                     <input type="checkbox" id="useOfficialStandard" class="w-4 h-4 text-blue-600 rounded" onchange="toggleOfficialStandard(); calculateAll();">
-                                    <label for="useOfficialStandard" class="text-xs md:text-sm font-medium text-blue-800">使用地区官方标准</label>
+                                    <label for="useOfficialStandard" class="text-xs md:text-sm font-medium text-blue-700">使用地区官方标准</label>
                                 </div>
-                                <button onclick="showFeeBasis()" class="text-xs text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
+                                <button onclick="showFeeBasis()" class="text-xs text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1">
                                     <span>📋</span> 查看依据
                                 </button>
                             </div>
@@ -938,20 +915,20 @@
                             <div id="customRatioSettings">
                                 <div class="grid grid-cols-2 gap-2">
                                     <div>
-                                        <label class="block text-[10px] md:text-xs font-medium text-gray-600 mb-1">基础费率(%)</label>
+                                        <label class="block text-[10px] md:text-xs font-medium text-gray-500 mb-1">基础费率(%)</label>
                                         <input type="number" id="baseRate" value="6" step="0.1" 
-                                            class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg"
+                                            class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-lg"
                                             oninput="calculateAll()">
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] md:text-xs font-medium text-gray-600 mb-1">最低收费(元)</label>
+                                        <label class="block text-[10px] md:text-xs font-medium text-gray-500 mb-1">最低收费(元)</label>
                                         <input type="number" id="minFee" value="5000" 
-                                            class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg"
+                                            class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-lg"
                                             oninput="calculateAll()">
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] md:text-xs font-medium text-gray-600 mb-1">费用折扣: <span id="discountDisplay" class="text-blue-600">100%</span></label>
+                                    <label class="block text-[10px] md:text-xs font-medium text-gray-500 mb-1">费用折扣: <span id="discountDisplay" class="text-blue-600">100%</span></label>
                                     <input type="range" id="feeDiscount" min="0" max="100" value="100" 
                                         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                                         oninput="updateDiscountDisplay(); calculateAll()">
@@ -978,23 +955,23 @@
                         </div>
 
                         <div id="fixedMode" class="hidden">
-                            <label class="block text-[10px] md:text-xs font-medium text-gray-600 mb-1">固定金额(元)</label>
+                            <label class="block text-[10px] md:text-xs font-medium text-gray-500 mb-1">固定金额(元)</label>
                             <input type="number" id="fixedFeeAmount" value="50000" 
-                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                                class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg"
                                 oninput="calculateAll()">
                         </div>
 
                         <div id="hourlyMode" class="hidden grid grid-cols-2 gap-2">
                             <div>
-                                <label class="block text-[10px] md:text-xs font-medium text-gray-600 mb-1">小时费率(元)</label>
+                                <label class="block text-[10px] md:text-xs font-medium text-gray-500 mb-1">小时费率(元)</label>
                                 <input type="number" id="hourlyRate" value="2000" 
-                                    class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg"
+                                    class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-lg"
                                     oninput="calculateAll()">
                             </div>
                             <div>
-                                <label class="block text-[10px] md:text-xs font-medium text-gray-600 mb-1">预计工时(小时)</label>
+                                <label class="block text-[10px] md:text-xs font-medium text-gray-500 mb-1">预计工时(小时)</label>
                                 <input type="number" id="estimatedHours" value="50" 
-                                    class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg"
+                                    class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-lg"
                                     oninput="calculateAll()">
                             </div>
                         </div>
@@ -1005,24 +982,24 @@
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label class="block text-[10px] md:text-xs font-medium text-gray-600 mb-1">风险比例(%)</label>
+                                    <label class="block text-[10px] md:text-xs font-medium text-gray-500 mb-1">风险比例(%)</label>
                                     <input type="number" id="riskRate" value="15" max="30" step="0.5"
-                                        class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg"
+                                        class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-lg"
                                         oninput="validateRiskRate(); calculateAll()">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] md:text-xs font-medium text-gray-600 mb-1">前期基础费用(元)</label>
+                                    <label class="block text-[10px] md:text-xs font-medium text-gray-500 mb-1">前期基础费用(元)</label>
                                     <input type="number" id="riskBaseFee" value="0" 
-                                        class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg"
+                                        class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-lg"
                                         oninput="calculateAll()">
                                 </div>
                             </div>
                         </div>
 
                         <div class="mt-3 space-y-2">
-                            <div class="p-3 md:p-4 bg-white rounded-xl border-2 border-blue-500 shadow-sm">
+                            <div class="p-3 md:p-4 bg-white rounded-xl border-2 border-blue-400 shadow-sm">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-sm md:text-base font-semibold text-gray-700">律师费</span>
+                                    <span class="text-sm md:text-base font-semibold text-gray-600">律师费</span>
                                     <span id="lawyerFeeResult" class="text-xl md:text-2xl font-bold text-blue-600 number-font">¥0</span>
                                 </div>
                             </div>
@@ -1042,23 +1019,23 @@
                     <!-- 附加费用项目 -->
                     <div class="glass-panel rounded-xl shadow-lg border-l-4 border-orange-400 collapsible-section" id="section-additional">
                         <div class="collapsible-header p-3 md:p-4 flex justify-between items-center" onclick="toggleSection('section-additional')">
-                            <h3 class="text-base md:text-lg font-bold text-gray-800 flex items-center gap-2 tracking-tight">
-                                <span class="w-7 h-7 md:w-8 md:h-8 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 text-sm md:text-base">💰</span>
+                            <h3 class="text-base md:text-lg font-bold text-gray-700 flex items-center gap-2 tracking-tight">
+                                <span class="w-7 h-7 md:w-8 md:h-8 bg-orange-50 rounded-lg flex items-center justify-center text-orange-600 text-sm md:text-base">💰</span>
                                 <span class="truncate">附加费用项目</span>
                             </h3>
-                            <svg class="w-5 h-5 text-gray-500 toggle-icon flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-gray-400 toggle-icon flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </div>
                         <div class="collapsible-content px-3 md:px-4 pb-3 md:pb-4 space-y-3">
-                            <div class="text-[10px] text-gray-500 bg-orange-50/50 p-2 rounded-lg border border-orange-100 mb-2">
+                            <div class="text-[10px] text-gray-400 bg-orange-50/50 p-2 rounded-lg border border-orange-100 mb-2">
                                 💡 附加费用包括：法院保全费、保全保险费、差旅费、公告费、公证费、评估/鉴定费、调查取证费、其它费用等
                             </div>
 
                             <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                                 <div class="flex items-center gap-2">
                                     <input type="checkbox" id="enablePreservation" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
-                                    <label class="text-xs md:text-sm font-medium text-gray-700">法院保全费</label>
+                                    <label class="text-xs md:text-sm font-medium text-gray-600">法院保全费</label>
                                 </div>
                                 <span id="preservationFeeDisplay" class="text-xs md:text-sm font-bold text-orange-600">¥0</span>
                             </div>
@@ -1067,12 +1044,12 @@
                                 <div class="flex items-center gap-2 flex-1">
                                     <input type="checkbox" id="enableInsurance" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
                                     <div class="flex-1 min-w-0">
-                                        <label class="text-xs md:text-sm font-medium text-gray-700 block truncate">保全保险费</label>
+                                        <label class="text-xs md:text-sm font-medium text-gray-600 block truncate">保全保险费</label>
                                         <div class="flex items-center gap-2 mt-1">
                                             <input type="number" id="insuranceRate" value="1.5" step="0.1" 
-                                                class="w-16 px-2 py-1 text-xs border border-gray-300 rounded"
+                                                class="w-16 px-2 py-1 text-xs border border-gray-200 rounded"
                                                 oninput="calculateAll()">
-                                            <span class="text-[10px] text-gray-500">%</span>
+                                            <span class="text-[10px] text-gray-400">%</span>
                                             <button onclick="syncInsuranceAmount()" class="text-[10px] text-blue-600 hover:underline whitespace-nowrap">同步标的</button>
                                         </div>
                                     </div>
@@ -1084,11 +1061,11 @@
                                 <div class="flex items-center gap-2 flex-1">
                                     <input type="checkbox" id="enableTravel" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
                                     <div class="flex-1">
-                                        <label class="text-xs md:text-sm font-medium text-gray-700">差旅费</label>
+                                        <label class="text-xs md:text-sm font-medium text-gray-600">差旅费</label>
                                     </div>
                                 </div>
                                 <input type="number" id="travelFee" value="0" 
-                                    class="w-24 px-2 py-1 text-sm border border-gray-300 rounded-lg text-right number-font"
+                                    class="w-24 px-2 py-1 text-sm border border-gray-200 rounded-lg text-right number-font"
                                     oninput="calculateAll()" placeholder="0">
                             </div>
 
@@ -1096,11 +1073,11 @@
                                 <div class="flex items-center gap-2 flex-1">
                                     <input type="checkbox" id="enableAnnouncement" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
                                     <div class="flex-1">
-                                        <label class="text-xs md:text-sm font-medium text-gray-700">公告费</label>
+                                        <label class="text-xs md:text-sm font-medium text-gray-600">公告费</label>
                                     </div>
                                 </div>
                                 <input type="number" id="announcementFee" value="0" 
-                                    class="w-24 px-2 py-1 text-sm border border-gray-300 rounded-lg text-right number-font"
+                                    class="w-24 px-2 py-1 text-sm border border-gray-200 rounded-lg text-right number-font"
                                     oninput="calculateAll()" placeholder="0">
                             </div>
 
@@ -1108,11 +1085,11 @@
                                 <div class="flex items-center gap-2 flex-1">
                                     <input type="checkbox" id="enableNotary" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
                                     <div class="flex-1">
-                                        <label class="text-xs md:text-sm font-medium text-gray-700">公证费</label>
+                                        <label class="text-xs md:text-sm font-medium text-gray-600">公证费</label>
                                     </div>
                                 </div>
                                 <input type="number" id="notaryFee" value="0" 
-                                    class="w-24 px-2 py-1 text-sm border border-gray-300 rounded-lg text-right number-font"
+                                    class="w-24 px-2 py-1 text-sm border border-gray-200 rounded-lg text-right number-font"
                                     oninput="calculateAll()" placeholder="0">
                             </div>
 
@@ -1120,11 +1097,11 @@
                                 <div class="flex items-center gap-2 flex-1">
                                     <input type="checkbox" id="enableEvaluation" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
                                     <div class="flex-1">
-                                        <label class="text-xs md:text-sm font-medium text-gray-700">评估/鉴定费</label>
+                                        <label class="text-xs md:text-sm font-medium text-gray-600">评估/鉴定费</label>
                                     </div>
                                 </div>
                                 <input type="number" id="evaluationFee" value="0" 
-                                    class="w-24 px-2 py-1 text-sm border border-gray-300 rounded-lg text-right number-font"
+                                    class="w-24 px-2 py-1 text-sm border border-gray-200 rounded-lg text-right number-font"
                                     oninput="calculateAll()" placeholder="0">
                             </div>
 
@@ -1132,11 +1109,11 @@
                                 <div class="flex items-center gap-2 flex-1">
                                     <input type="checkbox" id="enableInvestigation" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
                                     <div class="flex-1">
-                                        <label class="text-xs md:text-sm font-medium text-gray-700">调查取证费</label>
+                                        <label class="text-xs md:text-sm font-medium text-gray-600">调查取证费</label>
                                     </div>
                                 </div>
                                 <input type="number" id="investigationFee" value="0" 
-                                    class="w-24 px-2 py-1 text-sm border border-gray-300 rounded-lg text-right number-font"
+                                    class="w-24 px-2 py-1 text-sm border border-gray-200 rounded-lg text-right number-font"
                                     oninput="calculateAll()" placeholder="0">
                             </div>
 
@@ -1144,11 +1121,11 @@
                                 <div class="flex items-center gap-2 flex-1">
                                     <input type="checkbox" id="enableOther" class="w-4 h-4 text-orange-600 rounded" onchange="calculateAll()">
                                     <div class="flex-1">
-                                        <label class="text-xs md:text-sm font-medium text-gray-700">其它费用</label>
+                                        <label class="text-xs md:text-sm font-medium text-gray-600">其它费用</label>
                                     </div>
                                 </div>
                                 <input type="number" id="otherFee" value="0" 
-                                    class="w-24 px-2 py-1 text-sm border border-gray-300 rounded-lg text-right number-font"
+                                    class="w-24 px-2 py-1 text-sm border border-gray-200 rounded-lg text-right number-font"
                                     oninput="calculateAll()" placeholder="0">
                             </div>
                         </div>
@@ -1157,11 +1134,11 @@
                     <!-- 法务代理节省费用 -->
                     <div class="glass-panel rounded-xl shadow-lg border-l-4 border-indigo-400 collapsible-section" id="section-cooperation">
                         <div class="collapsible-header p-3 md:p-4 flex justify-between items-center" onclick="toggleSection('section-cooperation')">
-                            <h3 class="text-base md:text-lg font-bold text-gray-800 flex items-center gap-2 tracking-tight">
-                                <span class="w-7 h-7 md:w-8 md:h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-sm md:text-base">🤝</span>
+                            <h3 class="text-base md:text-lg font-bold text-gray-700 flex items-center gap-2 tracking-tight">
+                                <span class="w-7 h-7 md:w-8 md:h-8 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600 text-sm md:text-base">🤝</span>
                                 <span class="truncate">法务代理节省费用</span>
                             </h3>
-                            <svg class="w-5 h-5 text-gray-500 toggle-icon flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-gray-400 toggle-icon flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
                         </div>
@@ -1174,7 +1151,7 @@
                                 <span class="text-xs text-indigo-600">法务代理可节省律师费</span>
                             </div>
 
-                            <select id="cooperationMode" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" onchange="updateCooperationMode()">
+                            <select id="cooperationMode" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500" onchange="updateCooperationMode()">
                                 <option value="0">律师代理（0%减免）</option>
                                 <option value="100">法务代理（100%减免）</option>
                                 <option value="30">法务主导+律师指导（30%减免）</option>
@@ -1183,9 +1160,9 @@
                             </select>
                             
                             <div id="customCooperationDiv" class="hidden">
-                                <label class="block text-[10px] md:text-xs font-medium text-gray-600 mb-1">律师费减免费率(%)</label>
+                                <label class="block text-[10px] md:text-xs font-medium text-gray-500 mb-1">律师费减免费率(%)</label>
                                 <input type="number" id="customCooperationRate" min="0" max="100" value="0"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg"
                                     oninput="calculateAll()">
                             </div>
                             
@@ -1199,11 +1176,11 @@
                 <!-- 3. 诉讼费计算器 -->
                 <div class="glass-panel rounded-xl shadow-lg collapsible-section" id="section-standard">
                     <div class="collapsible-header p-3 md:p-4 flex justify-between items-center" onclick="toggleSection('section-standard')">
-                        <h3 class="text-base md:text-lg font-bold text-gray-800 flex items-center gap-2 tracking-tight">
-                            <span class="w-7 h-7 md:w-8 md:h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600 text-sm md:text-base">⚖️</span>
+                        <h3 class="text-base md:text-lg font-bold text-gray-700 flex items-center gap-2 tracking-tight">
+                            <span class="w-7 h-7 md:w-8 md:h-8 bg-green-50 rounded-lg flex items-center justify-center text-green-600 text-sm md:text-base">⚖️</span>
                             <span class="truncate">诉讼费计算器</span>
                         </h3>
-                        <svg class="w-5 h-5 text-gray-500 toggle-icon flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-gray-400 toggle-icon flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </div>
@@ -1218,8 +1195,8 @@
                         
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-1 tracking-wide">案件类型</label>
-                                <select id="caseType" class="w-full px-3 py-2 text-sm font-medium border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="handleCaseTypeChange()">
+                                <label class="block text-xs md:text-sm font-semibold text-gray-600 mb-1 tracking-wide">案件类型</label>
+                                <select id="caseType" class="w-full px-3 py-2 text-sm font-medium border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="handleCaseTypeChange()">
                                     <option value="property">财产案件</option>
                                     <option value="non-property">非财产案件</option>
                                     <option value="divorce">离婚</option>
@@ -1236,8 +1213,8 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-1 tracking-wide">诉讼阶段</label>
-                                <select id="litigationStage" class="w-full px-3 py-2 text-sm font-medium border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="calculateAll()">
+                                <label class="block text-xs md:text-sm font-semibold text-gray-600 mb-1 tracking-wide">诉讼阶段</label>
+                                <select id="litigationStage" class="w-full px-3 py-2 text-sm font-medium border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="calculateAll()">
                                     <option value="first">一审</option>
                                     <option value="second">二审</option>
                                     <option value="retrial">再审</option>
@@ -1249,13 +1226,13 @@
 
                         <div class="flex items-center gap-2">
                             <input type="checkbox" id="discountRule" class="w-4 h-4 text-blue-600 rounded" onchange="calculateAll()">
-                            <label for="discountRule" class="text-xs md:text-sm text-gray-700">适用简易程序/调解/撤诉（诉讼费减半收取）</label>
+                            <label for="discountRule" class="text-xs md:text-sm text-gray-600">适用简易程序/调解/撤诉（诉讼费减半收取）</label>
                         </div>
 
                         <div class="mt-3 space-y-2">
-                            <div class="p-3 md:p-4 bg-white rounded-xl border-2 border-blue-500 shadow-sm">
+                            <div class="p-3 md:p-4 bg-white rounded-xl border-2 border-blue-400 shadow-sm">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-sm md:text-base font-semibold text-gray-700">诉讼费</span>
+                                    <span class="text-sm md:text-base font-semibold text-gray-600">诉讼费</span>
                                     <span id="courtFeeResult" class="text-xl md:text-2xl font-bold text-blue-600 number-font tracking-tight">¥0</span>
                                 </div>
                             </div>
@@ -1272,11 +1249,11 @@
                 <!-- 3. 律师费计算器 -->
                 <div class="glass-panel rounded-xl shadow-lg border-l-4 border-pink-500 collapsible-section hidden" id="section-reverse">
                     <div class="collapsible-header p-3 md:p-4 flex justify-between items-center" onclick="toggleSection('section-reverse')">
-                        <h3 class="text-base md:text-lg font-bold text-gray-800 flex items-center gap-2 tracking-tight">
-                            <span class="w-7 h-7 md:w-8 md:h-8 bg-pink-100 rounded-lg flex items-center justify-center text-pink-600 text-sm md:text-base">🔄</span>
+                        <h3 class="text-base md:text-lg font-bold text-gray-700 flex items-center gap-2 tracking-tight">
+                            <span class="w-7 h-7 md:w-8 md:h-8 bg-pink-50 rounded-lg flex items-center justify-center text-pink-600 text-sm md:text-base">🔄</span>
                             <span class="truncate">诉讼费反推计算器</span>
                         </h3>
-                        <svg class="w-5 h-5 text-gray-500 toggle-icon flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-gray-400 toggle-icon flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </div>
@@ -1302,29 +1279,15 @@
 
                 <!-- 6. 操作按钮 -->
                 <div class="flex flex-wrap gap-2 md:gap-3 no-print">
-                    <button onclick="saveScheme()" class="flex-1 bg-blue-600 text-white py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base hover:bg-blue-700 transition active:scale-95 shadow-lg">
+                    <button onclick="saveScheme()" class="flex-1 bg-blue-500 text-white py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base hover:bg-blue-600 transition active:scale-95 shadow-lg">
                         💾 保存当前方案
                     </button>
-                    <button onclick="clearAll()" class="px-4 md:px-6 bg-gray-200 text-gray-700 py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base hover:bg-gray-300 transition active:scale-95">
+                    <button onclick="clearAll()" class="px-4 md:px-6 bg-gray-200 text-gray-600 py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base hover:bg-gray-200 transition active:scale-95">
                         清空
                     </button>
                 </div>
 
                 <!-- 7. 历史记录 -->
-                <div class="glass-panel rounded-xl p-4 shadow-lg collapsible-section" id="section-history">
-                    <div class="collapsible-header flex justify-between items-center mb-2" onclick="toggleSection('section-history')">
-                        <h3 class="text-base md:text-lg font-bold text-gray-800">历史记录</h3>
-                        <div class="flex items-center gap-2">
-                            <button onclick="event.stopPropagation(); clearHistory()" class="text-xs text-red-600 hover:text-red-800">清空全部</button>
-                            <svg class="w-5 h-5 text-gray-500 toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="collapsible-content space-y-2 max-h-48 md:max-h-64 overflow-y-auto" id="historyList">
-                        <p class="text-xs md:text-sm text-gray-500 text-center py-4">暂无历史记录</p>
-                    </div>
-                </div>
                 
             </div>
 
@@ -1335,42 +1298,42 @@
                 <div id="exportChartArea" class="space-y-4 md:space-y-6">
                 
                 <!-- 费用计算结果主面板 -->
-                <div class="glass-panel rounded-xl md:rounded-2xl p-4 md:p-6 shadow-xl border-t-4 border-blue-500">
+                <div class="glass-panel rounded-xl md:rounded-2xl p-4 md:p-6 shadow-xl border-t-4 border-blue-400">
                     <div class="mb-4 md:mb-6 pb-4 border-b border-gray-200">
                         <div class="flex flex-col md:flex-row justify-between items-start gap-4">
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 mb-2">
-                                    <span class="text-xs md:text-sm text-gray-500">项目名称</span>
+                                    <span class="text-xs md:text-sm text-gray-400">项目名称</span>
                                     <span class="text-xs text-gray-400">|</span>
-                                    <span id="displayProjectName" class="text-base md:text-lg font-bold text-gray-800 truncate">--</span>
+                                    <span id="displayProjectName" class="text-base md:text-lg font-bold text-gray-700 truncate">--</span>
                                 </div>
                                 <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-2">
-                                    <span class="text-xs md:text-sm text-gray-500">标的金额</span>
+                                    <span class="text-xs md:text-sm text-gray-400">标的金额</span>
                                     <div class="flex items-baseline gap-2">
                                         <span id="displayAmount" class="text-xl md:text-2xl font-bold text-indigo-600 number-font">¥0</span>
-                                        <span id="displayAmountChinese" class="text-xs md:text-sm text-gray-500 hidden sm:inline">--</span>
+                                        <span id="displayAmountChinese" class="text-xs md:text-sm text-gray-400 hidden sm:inline">--</span>
                                     </div>
                                 </div>
-                                <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
-                                    <span id="displayAttacker" class="hidden"><span class="text-gray-400">攻方：</span><span class="font-medium text-gray-700">--</span></span>
-                                    <span id="displayDefender" class="hidden"><span class="text-gray-400">守方：</span><span class="font-medium text-gray-700">--</span></span>
-                                    <span id="displayAgent" class="hidden"><span class="text-gray-400">经办人：</span><span class="font-medium text-gray-700">--</span></span>
-                                    <span id="displayParty" class="hidden"><span class="text-gray-400">代理人：</span><span class="font-medium text-gray-700">--</span></span>
+                                <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+                                    <span id="displayAttacker" class="hidden"><span class="text-gray-400">攻方：</span><span class="font-medium text-gray-600">--</span></span>
+                                    <span id="displayDefender" class="hidden"><span class="text-gray-400">守方：</span><span class="font-medium text-gray-600">--</span></span>
+                                    <span id="displayAgent" class="hidden"><span class="text-gray-400">经办人：</span><span class="font-medium text-gray-600">--</span></span>
+                                    <span id="displayParty" class="hidden"><span class="text-gray-400">代理人：</span><span class="font-medium text-gray-600">--</span></span>
                                 </div>
                             </div>
-                            <div class="text-left md:text-right w-full md:w-auto bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-3 md:p-4 border border-blue-100">
-                                <div class="text-xs md:text-sm text-gray-600 mb-1">预计总费用</div>
-                                <div class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent number-font" id="totalCost" data-value="0">
+                            <div class="text-left md:text-right w-full md:w-auto bg-blue-50 rounded-xl p-3 md:p-4 border border-blue-200">
+                                <div class="text-xs md:text-sm text-gray-500 mb-1">预计总费用</div>
+                                <div class="text-2xl md:text-3xl font-bold text-blue-700 number-font" id="totalCost" data-value="0">
                                     ¥0.00
                                 </div>
-                                <div class="text-xs md:text-sm text-gray-600 mt-1 truncate" id="totalCostChinese"></div>
+                                <div class="text-xs md:text-sm text-gray-500 mt-1 truncate" id="totalCostChinese"></div>
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-4 md:mb-6" id="costRatioSection">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs md:text-sm font-medium text-gray-700">诉讼成本占比</span>
+                            <span class="text-xs md:text-sm font-medium text-gray-600">诉讼成本占比</span>
                             <span id="costRatioDisplay" class="text-sm md:text-base font-bold text-blue-600" data-value="0">0.00%</span>
                         </div>
                         <div class="relative w-full h-4 md:h-6 bg-gray-200 rounded-full overflow-hidden shadow-inner">
@@ -1383,9 +1346,9 @@
                                 <span>100%</span>
                             </div>
                         </div>
-                        <div class="flex justify-between items-center mt-1 text-[10px] md:text-xs text-gray-500">
+                        <div class="flex justify-between items-center mt-1 text-[10px] md:text-xs text-gray-400">
                             <span>成本率 = 总费用 ÷ 标的额</span>
-                            <span id="costRatioLevel" class="font-medium text-gray-600">--</span>
+                            <span id="costRatioLevel" class="font-medium text-gray-500">--</span>
                         </div>
                     </div>
 
@@ -1395,20 +1358,23 @@
                         </div>
                         <div class="space-y-2 md:space-y-3" id="feeCardsContainer">
                             <div id="mainFeeCards" class="space-y-2 md:space-y-3">
-                                <div class="flex justify-between items-center p-2 md:p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500" id="courtFeeCard">
-                                    <span class="text-xs md:text-sm font-medium text-gray-700">法院诉讼费</span>
+                                <div class="flex justify-between items-center p-2 md:p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400" id="courtFeeCard">
+                                    <span class="text-xs md:text-sm font-medium text-gray-600">法院诉讼费</span>
                                     <span class="text-sm md:text-lg font-bold text-blue-600 number-font" id="courtFeeDisplay">¥0</span>
                                 </div>
-                                <div class="flex justify-between items-center p-2 md:p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500" id="lawyerFeeCard">
-                                    <span class="text-xs md:text-sm font-medium text-gray-700">律师代理费</span>
+                                <div class="flex justify-between items-center p-2 md:p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400" id="lawyerFeeCard">
+                                    <span class="text-xs md:text-sm font-medium text-gray-600">律师代理费</span>
                                     <span class="text-sm md:text-lg font-bold text-blue-600 number-font" id="lawyerFeeDisplay">¥0</span>
                                 </div>
                                 <div class="flex justify-between items-center p-2 md:p-3 bg-orange-50 rounded-lg border-l-4 border-orange-500" id="additionalFeeRow" style="display:none;">
-                                    <span class="text-xs md:text-sm font-medium text-gray-700">附加费用</span>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs md:text-sm font-medium text-gray-600">附加费用</span>
+                                        <span class="text-[10px] text-gray-400 mt-0.5">保全费、保险费、差旅费、公告费、公证费等</span>
+                                    </div>
                                     <span class="text-sm md:text-lg font-bold text-orange-600 number-font" id="additionalFeeDisplay">¥0</span>
                                 </div>
                                 <div class="flex justify-between items-center p-2 md:p-3 bg-indigo-50 rounded-lg border-l-4 border-indigo-500" id="cooperationRow" style="display:none;">
-                                    <span class="text-xs md:text-sm font-medium text-gray-700">法务代理节省费用</span>
+                                    <span class="text-xs md:text-sm font-medium text-gray-600">法务代理节省费用</span>
                                     <span class="text-sm md:text-lg font-bold text-indigo-600 number-font" id="cooperationDisplay">-¥0</span>
                                 </div>
                             </div>
@@ -1417,7 +1383,7 @@
 
                     <div class="overflow-x-auto -mx-2 md:mx-0">
                         <table class="w-full text-xs md:text-sm">
-                            <thead class="bg-gray-50 text-gray-700">
+                            <thead class="bg-gray-50 text-gray-600">
                                 <tr>
                                     <th class="px-2 md:px-4 py-2 md:py-3 text-left font-semibold tracking-wide">费用项目</th>
                                     <th class="px-2 md:px-4 py-2 md:py-3 text-right font-semibold">计算依据</th>
@@ -1439,7 +1405,7 @@
                         </table>
                     </div>
 
-                    <div class="mt-3 md:mt-4 p-3 md:p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div class="mt-3 md:mt-4 p-3 md:p-4 bg-amber-50 border border-amber-200 rounded-lg">
                         <h4 class="font-bold warning-text mb-1 md:mb-2 flex items-center gap-2 text-sm md:text-lg">
                             <span>⚠️</span> 风险提示与免责声明
                         </h4>
@@ -1454,10 +1420,10 @@
 
                 <div class="glass-panel rounded-xl md:rounded-2xl p-4 md:p-6 shadow-lg" id="schemeCompareSection" style="display:none;">
                     <div class="flex justify-between items-center mb-3 md:mb-4">
-                        <h3 class="text-base md:text-lg font-bold text-gray-800 flex items-center gap-2 tracking-tight">
+                        <h3 class="text-base md:text-lg font-bold text-gray-700 flex items-center gap-2 tracking-tight">
                             <span>📊</span> 方案对比分析
                         </h3>
-                        <button onclick="clearAllSchemes()" class="text-xs px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200">清空方案</button>
+                        <button onclick="clearAllSchemes()" class="text-xs px-2 py-1 bg-red-50 text-red-600 rounded hover:bg-red-200">清空方案</button>
                     </div>
                     
                     <div id="schemesContainer" class="space-y-2 md:space-y-3 mb-3 md:mb-4">
@@ -1481,10 +1447,26 @@
                     <button onclick="printPDF()" class="bg-red-600 text-white py-2 rounded-lg text-xs md:text-sm hover:bg-red-700 transition active:scale-95">PDF</button>
                 </div>
 
-                <div id="printArea" class="print-only">
+                
+                
+                <!-- 历史记录 -->
+                <div class="glass-panel rounded-xl p-4 shadow-lg collapsible-section" id="section-history">
+                    <div class="collapsible-header flex justify-between items-center mb-2" onclick="toggleSection('section-history')">
+                        <h3 class="text-base md:text-lg font-bold text-gray-700">历史记录</h3>
+                        <div class="flex items-center gap-2">
+                            <button onclick="event.stopPropagation(); clearHistory()" class="text-xs text-red-600 hover:text-red-800">清空全部</button>
+                            <svg class="w-5 h-5 text-gray-400 toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="collapsible-content space-y-2 max-h-48 md:max-h-64 overflow-y-auto" id="historyList">
+                        <p class="text-xs md:text-sm text-gray-400 text-center py-4">暂无历史记录</p>
+                    </div>
+                </div><div id="printArea" class="print-only">
                     <div class="text-center mb-6 md:mb-8">
-                        <h1 class="text-2xl md:text-3xl font-bold mb-2">诉讼费用预算报告</h1>
-                        <p class="text-gray-600 text-sm md:text-base" id="printProjectName">纠纷案</p>
+                        <h1 class="text-2xl md:text-3xl font-bold mb-2 text-gray-700">诉讼相关费用预算报告</h1>
+                        <p class="text-gray-400 text-sm md:text-base" id="printProjectName">纠纷案</p>
                     </div>
                     <div class="grid grid-cols-2 gap-2 md:gap-4 mb-4 md:mb-6 text-xs md:text-sm">
                         <div><strong>当事人：</strong><span id="printParty"></span></div>
@@ -1493,7 +1475,7 @@
                         <div><strong>生成时间：</strong><span id="printTime"></span></div>
                     </div>
                     <div id="printContent"></div>
-                    <div class="mt-6 md:mt-8 pt-3 md:pt-4 border-t text-[10px] md:text-xs text-gray-500 text-center">
+                    <div class="mt-6 md:mt-8 pt-3 md:pt-4 border-t text-[10px] md:text-xs text-gray-400 text-center">
                         <p>免责声明：本计算结果仅供参考，实际费用以相关机构实际收取为准。</p>
                         <p>Generated by 法务通 | https://asktai.github.io/AiLTK/</p>
                     </div>
@@ -1536,14 +1518,14 @@
         </div>
     </div>
 
-    <footer class="bg-gray-800 text-gray-400 py-6 md:py-8 mt-8 md:mt-12 no-print">
+    <footer class="bg-white text-gray-400 py-6 md:py-8 mt-8 md:mt-12 no-print border-t border-gray-200">
         <div class="max-w-7xl mx-auto px-4 text-center">
             <p class="mb-1 md:mb-2 text-xs md:text-sm" id="footerTextNormal">律师费计算器专业增强版 © 2026 | 中智药业集团</p>
             <p class="mb-1 md:mb-2 text-xs md:text-sm hidden" id="footerTextPro">诉讼费用成本预算分析系统 © 2026 | 中智药业集团</p>
             <p class="text-xs">
                 <span class="inline-block mx-1 md:mx-2">作者：胡皓</span>
                 <a href="https://github.com/asktai/AiLTK" target="_blank" class="text-blue-400 hover:underline mx-1 md:mx-2">GitHub</a>
-                <span class="inline-block mx-1 md:mx-2">版本：<span id="footerVersion">V1.7.2</span></span>
+                <span class="inline-block mx-1 md:mx-2">版本：<span id="footerVersion">V1.7.4</span></span>
             </p>
         </div>
     </footer>
@@ -1770,7 +1752,7 @@
                 document.getElementById('footerTextNormal').classList.add('hidden');
                 document.getElementById('footerTextPro').classList.remove('hidden');
             } else {
-                btn.className = 'mode-switch-btn px-3 md:px-4 py-2 rounded-lg text-sm font-medium bg-blue-100 text-blue-700 border border-blue-300 flex items-center gap-2 hover:bg-blue-100 transition shadow-sm cursor-pointer select-none';
+                btn.className = 'mode-switch-btn px-3 md:px-4 py-2 rounded-lg text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-2 hover:bg-blue-50 transition shadow-sm cursor-pointer select-none';
                 icon.textContent = '⚡';
                 text.textContent = '普通模式';
                 shortText.textContent = '普通';
@@ -2124,20 +2106,20 @@ function showGuangdongFeeBasis() {
         modal.innerHTML = `
             <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[85vh] flex flex-col">
                 <div class="p-4 md:p-5 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-2xl">
-                    <h3 class="text-lg md:text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <h3 class="text-lg md:text-xl font-bold text-gray-700 flex items-center gap-2">
                         <span class="text-blue-600">📋</span>
                         广东省律师收费依据
                     </h3>
-                    <button onclick="closeGuangdongBasis()" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
+                    <button onclick="closeGuangdongBasis()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
                 </div>
                 <div class="p-4 md:p-5 overflow-y-auto flex-1">
-                    <pre id="guangdongBasisContent" class="text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-wrap font-mono bg-gray-50 p-3 rounded-lg border border-gray-200"></pre>
+                    <pre id="guangdongBasisContent" class="text-xs md:text-sm text-gray-600 leading-relaxed whitespace-pre-wrap font-mono bg-gray-50 p-3 rounded-lg border border-gray-200"></pre>
                 </div>
                 <div class="p-4 md:p-5 border-t border-gray-200 flex gap-3">
-                    <button onclick="copyGuangdongBasis()" class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 transition active:scale-95 text-sm">
+                    <button onclick="copyGuangdongBasis()" class="flex-1 bg-blue-500 text-white py-2.5 rounded-lg font-medium hover:bg-blue-600 transition active:scale-95 text-sm">
                         📋 复制依据内容
                     </button>
-                    <button onclick="closeGuangdongBasis()" class="px-6 bg-gray-200 text-gray-700 py-2.5 rounded-lg font-medium hover:bg-gray-300 transition active:scale-95 text-sm">
+                    <button onclick="closeGuangdongBasis()" class="px-6 bg-gray-200 text-gray-600 py-2.5 rounded-lg font-medium hover:bg-gray-200 transition active:scale-95 text-sm">
                         关闭
                     </button>
                 </div>
@@ -2213,20 +2195,20 @@ function showGenericFeeBasis() {
         modal.innerHTML = `
             <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[85vh] flex flex-col">
                 <div class="p-4 md:p-5 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-2xl">
-                    <h3 class="text-lg md:text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <h3 class="text-lg md:text-xl font-bold text-gray-700 flex items-center gap-2">
                         <span class="text-blue-600">📋</span>
                         律师收费依据
                     </h3>
-                    <button onclick="closeGuangdongBasis()" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
+                    <button onclick="closeGuangdongBasis()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
                 </div>
                 <div class="p-4 md:p-5 overflow-y-auto flex-1">
-                    <pre id="guangdongBasisContent" class="text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-wrap font-mono bg-gray-50 p-3 rounded-lg border border-gray-200"></pre>
+                    <pre id="guangdongBasisContent" class="text-xs md:text-sm text-gray-600 leading-relaxed whitespace-pre-wrap font-mono bg-gray-50 p-3 rounded-lg border border-gray-200"></pre>
                 </div>
                 <div class="p-4 md:p-5 border-t border-gray-200 flex gap-3">
-                    <button onclick="copyGuangdongBasis()" class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 transition active:scale-95 text-sm">
+                    <button onclick="copyGuangdongBasis()" class="flex-1 bg-blue-500 text-white py-2.5 rounded-lg font-medium hover:bg-blue-600 transition active:scale-95 text-sm">
                         📋 复制依据内容
                     </button>
-                    <button onclick="closeGuangdongBasis()" class="px-6 bg-gray-200 text-gray-700 py-2.5 rounded-lg font-medium hover:bg-gray-300 transition active:scale-95 text-sm">
+                    <button onclick="closeGuangdongBasis()" class="px-6 bg-gray-200 text-gray-600 py-2.5 rounded-lg font-medium hover:bg-gray-200 transition active:scale-95 text-sm">
                         关闭
                     </button>
                 </div>
@@ -2531,8 +2513,8 @@ function syncAmountDisplay() {
             costChart.data.labels = newLabels;
             costChart.data.datasets[0].data = newData;
             costChart.data.datasets[0].backgroundColor = currentMode === 'professional'
-                ? ['#165DFF', '#4096FF', '#FA8C16']
-                : ['#165DFF', '#4096FF'];
+                ? ['#3B82F6', '#60A5FA', '#FA8C16']
+                : ['#3B82F6', '#60A5FA'];
             
             costChart.update('active');
         }
@@ -2586,7 +2568,7 @@ function syncAmountDisplay() {
                         const fontSize = (height / 160).toFixed(2);
                         ctx.font = `bold ${fontSize}em Inter, "Noto Sans SC", sans-serif`;
                         ctx.textBaseline = "middle";
-                        ctx.fillStyle = "#165DFF";
+                        ctx.fillStyle = "#3B82F6";
                         
                         const text = total > 0 ? "¥" + (total/10000).toFixed(2) + "万" : "¥0",
                               textX = Math.round((width - ctx.measureText(text).width) / 2),
@@ -2611,11 +2593,11 @@ function syncAmountDisplay() {
             const ctx = document.getElementById('costChart').getContext('2d');
             
             const gradientBlue = ctx.createLinearGradient(0, 0, 0, 400);
-            gradientBlue.addColorStop(0, '#165DFF');
-            gradientBlue.addColorStop(1, '#4096FF');
+            gradientBlue.addColorStop(0, '#3B82F6');
+            gradientBlue.addColorStop(1, '#60A5FA');
             
             const gradientCyan = ctx.createLinearGradient(0, 0, 0, 400);
-            gradientCyan.addColorStop(0, '#4096FF');
+            gradientCyan.addColorStop(0, '#60A5FA');
             gradientCyan.addColorStop(1, '#52C41A');
             
             const gradientOrange = ctx.createLinearGradient(0, 0, 0, 400);
@@ -2673,7 +2655,7 @@ function syncAmountDisplay() {
                         },
                         tooltip: {
                             backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                            titleColor: '#1e293b',
+                            titleColor: '#334155',
                             bodyColor: '#475569',
                             borderColor: 'rgba(226, 232, 240, 0.8)',
                             borderWidth: 1,
@@ -2735,7 +2717,7 @@ function syncAmountDisplay() {
             return str;
         }
 
-        // V1.7.2 修复：去除前导零
+        // V1.7.4 修复：去除前导零
         function formatAmountInput(input) {
             let value = input.value.replace(/,/g, '').replace(/[^\d.]/g, '');
             
@@ -2827,7 +2809,7 @@ function syncAmountDisplay() {
                 tier = '>2000万元 (0.5%)';
             }
 
-            const resultText = '¥' + formatMoney(Math.round(estimated)) + ' <span class="text-xs text-gray-500">（对应区间：' + tier + '）</span>';
+            const resultText = '¥' + formatMoney(Math.round(estimated)) + ' <span class="text-xs text-gray-400">（对应区间：' + tier + '）</span>';
             document.getElementById('reverseResult').innerHTML = resultText;
         }
 
@@ -2956,9 +2938,9 @@ function syncAmountDisplay() {
                 
                 tr.innerHTML = `
                     <td class="px-2 md:px-4 py-2 md:py-3 text-left">${item.name}</td>
-                    <td class="px-2 md:px-4 py-2 md:py-3 text-right text-gray-500 text-[10px]">${item.basis}</td>
+                    <td class="px-2 md:px-4 py-2 md:py-3 text-right text-gray-400 text-[10px]">${item.basis}</td>
                     <td class="px-2 md:px-4 py-2 md:py-3 text-right number-font">¥${formatMoney(item.amount)}</td>
-                    <td class="px-2 md:px-4 py-2 md:py-3 text-right text-gray-600">${itemRatio}%</td>
+                    <td class="px-2 md:px-4 py-2 md:py-3 text-right text-gray-500">${itemRatio}%</td>
                     <td class="px-2 md:px-4 py-2 md:py-3 text-right number-font ${ratioClass}">${costRatio}%</td>
                 `;
                 tbody.appendChild(tr);
@@ -3004,9 +2986,9 @@ function syncAmountDisplay() {
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div class="min-w-0 flex-1">
-                            <div class="font-bold text-gray-800 text-sm md:text-base tracking-tight">${scheme.name}</div>
-                            <div class="text-[10px] md:text-xs text-gray-500 mt-0.5 md:mt-1">${scheme.timestamp}</div>
-                            <div class="text-xs md:text-sm text-gray-600 mt-1 md:mt-2 truncate">
+                            <div class="font-bold text-gray-700 text-sm md:text-base tracking-tight">${scheme.name}</div>
+                            <div class="text-[10px] md:text-xs text-gray-400 mt-0.5 md:mt-1">${scheme.timestamp}</div>
+                            <div class="text-xs md:text-sm text-gray-500 mt-1 md:mt-2 truncate">
                                 标的：¥${formatMoney(scheme.data.amount)} | 总费用：¥${formatMoney(scheme.data.total)}
                             </div>
                         </div>
@@ -3047,8 +3029,8 @@ function syncAmountDisplay() {
                 data: {
                     labels: schemes.map(s => s.name),
                     datasets: [
-                        { label: '法院诉讼费', data: schemes.map(s => s.data.courtFee), backgroundColor: '#165DFF' },
-                        { label: '律师代理费', data: schemes.map(s => s.data.lawyerFee), backgroundColor: '#4096FF' },
+                        { label: '法院诉讼费', data: schemes.map(s => s.data.courtFee), backgroundColor: '#3B82F6' },
+                        { label: '律师代理费', data: schemes.map(s => s.data.lawyerFee), backgroundColor: '#60A5FA' },
                         { label: '附加费用', data: schemes.map(s => s.data.additionalTotal), backgroundColor: '#52C41A' }
                     ]
                 },
@@ -3071,15 +3053,15 @@ function syncAmountDisplay() {
         function loadHistory() {
             const history = JSON.parse(localStorage.getItem('litigationCalculatorHistory') || '[]');
             const container = document.getElementById('historyList');
-            if (history.length === 0) { container.innerHTML = '<p class="text-xs md:text-sm text-gray-500 text-center py-4">暂无历史记录</p>'; return; }
+            if (history.length === 0) { container.innerHTML = '<p class="text-xs md:text-sm text-gray-400 text-center py-4">暂无历史记录</p>'; return; }
             container.innerHTML = '';
             history.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'flex justify-between items-center p-2 md:p-3 bg-gray-50 rounded-lg text-xs md:text-sm';
                 div.innerHTML = `
                     <div class="flex-1 cursor-pointer min-w-0" onclick="restoreFromHistory(${index})">
-                        <div class="font-medium text-gray-800 truncate">${item.params.projectName || '纠纷案'}</div>
-                        <div class="text-[10px] text-gray-500">¥${formatMoney(item.data.amount)} | ${item.timestamp}</div>
+                        <div class="font-medium text-gray-700 truncate">${item.params.projectName || '纠纷案'}</div>
+                        <div class="text-[10px] text-gray-400">¥${formatMoney(item.data.amount)} | ${item.timestamp}</div>
                     </div>
                     <button onclick="deleteHistoryItem(${index})" class="text-red-500 hover:text-red-700 ml-2 text-xs md:text-sm">×</button>
                 `;
@@ -3201,7 +3183,7 @@ function syncAmountDisplay() {
                 }
             }
 
-            let text = `诉讼费用预算报告模板
+            let text = `诉讼相关费用预算报告模板
 ====================
 `;
             text += `项目名称：${projectName}
@@ -3287,7 +3269,7 @@ function syncAmountDisplay() {
         }
 
         function exportTXT() { downloadFile(generateReportText(), getFileName() + '.txt', 'text/plain;charset=utf-8'); }
-        function exportMD() { downloadFile('# 诉讼费用预算报告\n\n' + generateReportText().replace(/\n/g, '\n\n'), getFileName() + '.md', 'text/markdown;charset=utf-8'); }
+        function exportMD() { downloadFile('# 诉讼相关费用预算报告\n\n' + generateReportText().replace(/\n/g, '\n\n'), getFileName() + '.md', 'text/markdown;charset=utf-8'); }
         function exportCSV() {
             let csv = '费用项目,金额(元),占总费用,占标的额\n';
             document.querySelectorAll('#detailTableBody tr').forEach(row => {
@@ -3385,8 +3367,8 @@ function syncAmountDisplay() {
             let printHTML = `
                 <div style="max-width: 800px; margin: 0 auto; padding: 40px; font-family: 'PingFang SC', 'Microsoft YaHei', 'SimSun', serif; color: #333; line-height: 1.6;">
                     <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
-                        <h1 style="font-size: 24px; margin: 0; font-weight: bold;">☆诉讼费用预算报告☆</h1>
-                        <p style="font-size: 12px; color: #666; margin-top: 10px;">Report Generated by 法务通 V1.7.2</p>
+                        <h1 style="font-size: 24px; margin: 0; font-weight: bold;">☆诉讼相关费用预算报告☆</h1>
+                        <p style="font-size: 12px; color: #666; margin-top: 10px;">Report Generated by 法务通 V1.7.4</p>
                     </div>
 
                     <div style="margin-bottom: 25px;">
@@ -3412,12 +3394,12 @@ function syncAmountDisplay() {
                         </table>
                     </div>
 
-                    <div style="margin-bottom: 25px; background: #f8f9fa; padding: 15px; border-left: 4px solid #4f46e5;">
+                    <div style="margin-bottom: 25px; background: #f8f9fa; padding: 15px; border-left: 4px solid #3B82F6;">
                         <div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">案件基本信息</div>
                         <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
                             <tr>
                                 <td style="padding: 6px 0; width: 20%; color: #666;">争议标的额：</td>
-                                <td style="padding: 6px 0; font-weight: bold; color: #4f46e5;">¥${amount} (${amountChinese})</td>
+                                <td style="padding: 6px 0; font-weight: bold; color: #3B82F6;">¥${amount} (${amountChinese})</td>
                             </tr>
                             <tr>
                                 <td style="padding: 6px 0; color: #666;">案件阶段：</td>
@@ -3440,7 +3422,7 @@ function syncAmountDisplay() {
                             </tr>
                             ${courtFeeEnabled && courtFee !== '0' ? `<tr><td style="padding: 10px; border: 1px solid #ddd;">法院诉讼费</td><td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-family: monospace;">¥${courtFee}</td></tr>` : ''}
                             ${lawyerFeeEnabled && lawyerFee !== '0' ? `<tr style="background: #fafafa;"><td style="padding: 10px; border: 1px solid #ddd;">律师代理费</td><td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-family: monospace;">¥${lawyerFee}</td></tr>` : ''}
-                            ${currentMode === 'professional' && cooperationEnabled && cooperationEnabled ? `<tr><td style="padding: 10px; border: 1px solid #ddd; color: #4f46e5;">法务代理节省费用</td><td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-family: monospace; color: #4f46e5;">-¥${cooperationSaving}</td></tr>` : ''}
+                            ${currentMode === 'professional' && cooperationEnabled && cooperationEnabled ? `<tr><td style="padding: 10px; border: 1px solid #ddd; color: #3B82F6;">法务代理节省费用</td><td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-family: monospace; color: #3B82F6;">-¥${cooperationSaving}</td></tr>` : ''}
                             <tr>
                                 <td style="padding: 10px; border: 1px solid #ddd; padding-left: 20px; color: #666;">法院保全费</td>
                                 <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-family: monospace;">¥${preservationFee}</td>
@@ -3465,7 +3447,7 @@ function syncAmountDisplay() {
                     </div>
 
                     <div style="font-size: 16px; font-weight: bold; margin-top: 10px; border-top: 1px solid #333; padding-top: 5px;">===================</div>
-                    <div style="background: #f8f9fa; padding: 20px; border: 2px solid #4f46e5; margin-bottom: 20px; margin-top: 15px;">
+                    <div style="background: #f8f9fa; padding: 20px; border: 2px solid #3B82F6; margin-bottom: 20px; margin-top: 15px;">
                         <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
                             <tr>
                                 <td style="padding: 8px 0; font-size: 16px; font-weight: bold;">费用总计：</td>
@@ -3477,7 +3459,7 @@ function syncAmountDisplay() {
                             </tr>
                             <tr>
                                 <td style="padding: 8px 0; color: #666;">成本占比：</td>
-                                <td style="padding: 8px 0; text-align: right; font-weight: bold; color: ${parseFloat(costRatio) > 10 ? '#dc2626' : '#4f46e5'};">${costRatio}%</td>
+                                <td style="padding: 8px 0; text-align: right; font-weight: bold; color: ${parseFloat(costRatio) > 10 ? '#dc2626' : '#3B82F6'};">${costRatio}%</td>
                             </tr>
                         </table>
                     </div>
@@ -3496,7 +3478,7 @@ function syncAmountDisplay() {
                 <html>
                 <head>
                     <meta charset="UTF-8">
-                    <title>诉讼费用预算报告 - ${projectName}</title>
+                    <title>诉讼相关费用预算报告 - ${projectName}</title>
                     <style>
                         @media print {
                             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
